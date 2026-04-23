@@ -1,0 +1,819 @@
+{% extends "base.html" %}
+
+{% block title %}HS查询 - 快滴收 · HS智能查询系统{% endblock %}
+
+{% block content %}
+<div class="page-title"><i class="fas fa-search me-2" style="color: var(--accent-blue);"></i>HS编码查询</div>
+<div class="page-subtitle">支持关键词搜索与AI智能分类两种方式查询HS编码</div>
+
+<!-- Tab导航 -->
+<ul class="nav nav-tabs nav-tabs-custom mb-4" id="queryTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="search-tab" data-bs-toggle="tab" data-bs-target="#searchPanel"
+                type="button" role="tab" aria-controls="searchPanel" aria-selected="true">
+            <i class="fas fa-search me-1"></i>关键词搜索
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="ai-tab" data-bs-toggle="tab" data-bs-target="#aiPanel"
+                type="button" role="tab" aria-controls="aiPanel" aria-selected="false">
+            <i class="fas fa-robot me-1"></i>AI智能分类
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="queryTabContent">
+    <!-- 关键词搜索面板 -->
+    <div class="tab-pane fade show active" id="searchPanel" role="tabpanel" aria-labelledby="search-tab">
+        <!-- 搜索栏 -->
+        <div class="card card-custom mb-4">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-lg-8 col-md-7">
+                        <label class="form-label" style="font-weight: 600; color: var(--text-dark);">
+                            <i class="fas fa-keyboard me-1"></i>搜索关键词
+                        </label>
+                        <input type="text" id="searchKeyword" class="form-control search-input-custom"
+                               placeholder="输入商品名称、HS编码（如：8542.31）、描述关键词..."
+                               value="{{ request.args.get('keyword', '') }}">
+                    </div>
+                    <div class="col-lg-2 col-md-3">
+                        <label class="form-label" style="font-weight: 600; color: var(--text-dark);">
+                            <i class="fas fa-filter me-1"></i>编码层级
+                        </label>
+                        <select id="codeLevel" class="form-select" style="border-radius: 8px; padding: 10px;">
+                            <option value="all">全部</option>
+                            <option value="2">章（2位）</option>
+                            <option value="4">品目（4位）</option>
+                            <option value="6">子目（6位）</option>
+                            <option value="8">本国子目（8位）</option>
+                            <option value="10">完整编码（10位）</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 col-md-2">
+                        <button class="btn btn-primary-custom w-100" onclick="searchHandler()" style="padding: 10px;">
+                            <i class="fas fa-search me-1"></i>搜索
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 搜索结果 -->
+        <div id="searchResults">
+            <div class="text-center py-5" style="color: var(--text-muted);">
+                <i class="fas fa-search" style="font-size: 3rem; opacity: 0.3; margin-bottom: 1rem; display: block;"></i>
+                <p>请输入关键词开始搜索</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI智能分类面板 -->
+    <div class="tab-pane fade" id="aiPanel" role="tabpanel" aria-labelledby="ai-tab">
+        <div class="row">
+            <div class="col-lg-5">
+                <div class="card card-custom">
+                    <div class="card-header">
+                        <i class="fas fa-robot me-2"></i>产品信息输入
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label" style="font-weight: 600;">
+                                产品名称 <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" id="aiProductName" class="form-control search-input-custom"
+                                   placeholder="例如：高速运算服务器">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" style="font-weight: 600;">
+                                产品描述 <span class="text-danger">*</span>
+                            </label>
+                            <textarea id="aiProductDesc" class="form-control search-input-custom" rows="4"
+                                      placeholder="请详细描述产品的功能、用途、材质、工作原理等...&#10;例如：用于数据中心的高性能计算服务器，配备双路Intel Xeon处理器，256GB DDR4内存，支持NVMe SSD存储..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" style="font-weight: 600;">
+                                补充信息
+                            </label>
+                            <textarea id="aiExtraInfo" class="form-control search-input-custom" rows="3"
+                                      placeholder="品牌、型号、产地、用途、进出口状态等补充信息..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" style="font-weight: 600;">
+                                进出口方向
+                            </label>
+                            <select id="aiDirection" class="form-select" style="border-radius: 8px;">
+                                <option value="import">进口</option>
+                                <option value="export">出口</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary-custom w-100" onclick="aiClassifyHandler()" id="aiClassifyBtn">
+                            <i class="fas fa-robot me-2"></i>开始AI智能分类
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="card card-custom">
+                    <div class="card-header">
+                        <i class="fas fa-chart-pie me-2"></i>分类结果
+                    </div>
+                    <div class="card-body" id="aiResultPanel">
+                        <div class="text-center py-5" style="color: var(--text-muted);">
+                            <i class="fas fa-robot" style="font-size: 3rem; opacity: 0.3; margin-bottom: 1rem; display: block;"></i>
+                            <p>请在左侧输入产品信息后点击"开始AI智能分类"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 编码详情弹窗 -->
+<div class="modal fade" id="codeDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 680px;">
+        <div class="modal-content" style="border: none; border-radius: 16px; overflow: hidden;">
+            <div class="modal-header" style="background: linear-gradient(135deg, var(--accent-blue), #2980b9); color: #fff; border: none;">
+                <h5 class="modal-title"><i class="fas fa-barcode me-2"></i>HS编码详情</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="codeDetailBody" style="padding: 1.5rem; max-height: 70vh; overflow-y: auto;">
+                <div class="text-center py-4"><i class="fas fa-spinner fa-spin me-2"></i>加载中...</div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 加载遮罩 -->
+<div class="loading-overlay" id="loadingOverlay" style="display: none;">
+    <div class="loading-box">
+        <div class="loading-spinner"></div>
+        <p style="font-weight: 600; color: var(--primary-dark); margin-bottom: 0.3rem;" id="loadingText">正在处理...</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted);" id="loadingSubtext">请稍候</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 来源映射
+const SOURCE_MAP = {
+    'CN_CUSTOMS': '中国海关',
+    'WCO': 'WCO国际',
+    'CCPIT': '中国贸促会',
+    'AI': 'AI分类'
+};
+
+function getSourceLabel(source) {
+    return SOURCE_MAP[source] || source || '中国海关';
+}
+
+// 编码层级映射
+const LEVEL_MAP = {
+    2: '章（2位）',
+    4: '品目（4位）',
+    6: '子目（6位）',
+    8: '本国子目（8位）',
+    10: '完整编码（10位）'
+};
+
+function getLevelBadge(level) {
+    const colors = { 2: 'primary', 4: 'info', 6: 'success', 8: 'warning', 10: 'danger' };
+    const color = colors[level] || 'secondary';
+    return '<span class="badge bg-' + color + '">' + (LEVEL_MAP[level] || level + '位') + '</span>';
+}
+
+// 显示/隐藏加载
+function showLoading(text, subtext) {
+    document.getElementById('loadingText').textContent = text || '正在处理...';
+    document.getElementById('loadingSubtext').textContent = subtext || '请稍候';
+    document.getElementById('loadingOverlay').style.display = 'flex';
+}
+
+function hideLoading() {
+    document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+// 关键词搜索
+function searchHandler() {
+    const keyword = document.getElementById('searchKeyword').value.trim();
+    if (!keyword) {
+        showToast('请输入搜索关键词', 'warning');
+        return;
+    }
+    const level = document.getElementById('codeLevel').value;
+    showLoading('正在搜索...', '正在匹配HS编码数据库');
+
+    fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: keyword, type: 'all', code_level: level })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        renderSearchResults(data, keyword);
+    })
+    .catch(err => {
+        hideLoading();
+        showToast('搜索失败：' + err.message, 'danger');
+    });
+}
+
+// AI自我学习搜索
+function aiLearnSearch(keyword) {
+    if (!keyword) {
+        showToast('搜索关键词为空', 'warning');
+        return;
+    }
+    const container = document.getElementById('searchResults');
+    container.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="sr-only">学习中...</span>
+            </div>
+            <p style="color: var(--accent-blue); font-weight: 600;"><i class="fas fa-robot me-2"></i>AI正在学习中...</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">正在通过大模型搜索 "${keyword}" 的HS编码，请稍候...</p>
+        </div>`;
+
+    fetch('/api/ai-learn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: keyword })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.results && data.results.length > 0) {
+            showToast(data.message || 'AI学习完成！', 'success');
+            renderSearchResults(data, keyword);
+        } else {
+            container.innerHTML = `
+                <div class="text-center py-5" style="color: var(--text-muted);">
+                    <i class="fas fa-robot" style="font-size: 3rem; opacity: 0.3; margin-bottom: 1rem; display: block;"></i>
+                    <p>AI未能找到相关HS编码</p>
+                    <p style="font-size: 0.85rem;">${data.error || '请尝试更换更具体的产品名称'}</p>
+                    <button class="btn btn-sm mt-2" style="background: var(--accent-blue); color: #fff; border-radius: 6px;" onclick="aiLearnSearch('${keyword.replace(/'/g, "\\'")}')">
+                        <i class="fas fa-redo me-1"></i>重新学习
+                    </button>
+                </div>`;
+        }
+    })
+    .catch(err => {
+        container.innerHTML = `
+            <div class="text-center py-5" style="color: var(--danger);">
+                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; opacity: 0.3; margin-bottom: 1rem; display: block;"></i>
+                <p>AI学习失败</p>
+                <p style="font-size: 0.85rem;">${err.message}</p>
+            </div>`;
+    });
+}
+
+// 渲染搜索结果
+function renderSearchResults(data, keyword) {
+    const container = document.getElementById('searchResults');
+    if (!data.results || data.results.length === 0) {
+        const safeKeyword = (keyword || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        container.innerHTML = `
+            <div class="text-center py-5" style="color: var(--text-muted);">
+                <i class="fas fa-inbox" style="font-size: 3rem; opacity: 0.3; margin-bottom: 1rem; display: block;"></i>
+                <p>未找到匹配的HS编码</p>
+                <p style="font-size: 0.85rem; margin-bottom: 1rem;">请尝试更换关键词或减少搜索条件</p>
+                <button class="btn" style="background: var(--accent-blue); color: #fff; border-radius: 8px; padding: 8px 24px;" onclick="aiLearnSearch('${safeKeyword}')">
+                    <i class="fas fa-robot me-2"></i>AI智能学习查找
+                </button>
+                <p style="font-size: 0.78rem; margin-top: 0.5rem; color: var(--text-muted);">点击让AI通过互联网搜索并学习该产品的HS编码</p>
+            </div>`;
+        return;
+    }
+
+    let html = `<div class="d-flex justify-content-between align-items-center mb-3">
+        <span style="font-size: 0.9rem; color: var(--text-muted);">
+            共找到 <strong style="color: var(--accent-blue);">${data.total || data.results.length}</strong> 条结果
+            ${data.response_time_ms ? '<span style="margin-left: 12px; font-size: 0.82rem;">耗时 ' + data.response_time_ms + 'ms</span>' : ''}
+        </span>
+    </div>`;
+
+    html += '<div class="row g-3">';
+    data.results.forEach(item => {
+        const dualUseBadge = item.is_dual_use
+            ? '<span class="badge" style="background: var(--danger); color: #fff; font-size: 0.75rem;">两用物项</span>'
+            : '';
+        const supervision = item.customs_supervision
+            ? item.customs_supervision.split(',').map(c => '<span class="badge bg-info me-1" style="font-size: 0.72rem;">' + c.trim() + '</span>').join('')
+            : '';
+        const sourceLabel = getSourceLabel(item.source);
+        const levelBadge = getLevelBadge(item.level || item.code.length);
+        // 格式化10位编码
+        const fullCode = (item.code || '').padEnd(10, '0');
+        const codeLen = (item.code || '').length;
+        const codeColor = codeLen <= 2 ? 'var(--info)' : codeLen <= 4 ? 'var(--accent-blue)' : codeLen <= 6 ? 'var(--success)' : 'var(--highlight-blue)';
+
+        html += '<div class="col-lg-6 col-xl-4">';
+        html += '<div class="card card-custom h-100" style="cursor: pointer; transition: all 0.2s; border-left: 4px solid ' + codeColor + ';" onclick="showCodeDetail(\'' + item.code + '\')" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 15px rgba(0,0,0,0.1)\'" onmouseout="this.style.transform=\'none\';this.style.boxShadow=\'none\'">';
+        html += '<div class="card-body" style="padding: 1rem 1.2rem;">';
+        // 头部：编码 + 层级 + 两用物项
+        html += '<div class="d-flex justify-content-between align-items-start mb-2">';
+        html += '<div>';
+        html += '<div style="font-family: \'Courier New\', monospace; font-size: 1.35rem; font-weight: 800; color: ' + codeColor + '; letter-spacing: 1px; line-height: 1.2;">' + item.code + '</div>';
+        html += '<div style="font-family: \'Courier New\', monospace; font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.5px;">' + fullCode + '</div>';
+        html += '</div>';
+        html += '<div class="text-end d-flex flex-column align-items-end gap-1">';
+        html += '<button class="btn btn-sm" style="font-size: 0.7rem; padding: 2px 8px; color: var(--text-muted); background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 6px;" onclick="event.stopPropagation(); copyCode(\'' + item.code + '\', \'' + (item.description_cn || '').replace(/'/g, "\\'") + '\')" title="复制编码信息"><i class="fas fa-copy me-1"></i>复制</button>';
+        html += levelBadge;
+        if (dualUseBadge) html += '<br>' + dualUseBadge;
+        if (item.newly_learned) {
+            html += '<br><span class="badge" style="background: var(--success); color: #fff; font-size: 0.72rem;"><i class="fas fa-magic me-1"></i>AI新学习</span>';
+        }
+        html += '</div></div>';
+        // 描述
+        html += '<div style="font-weight: 600; font-size: 0.92rem; color: var(--text-dark); margin-bottom: 4px;">' + (item.description_cn || '--') + '</div>';
+        if (item.description_en) {
+            html += '<div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + item.description_en + '</div>';
+        }
+        // 底部信息
+        html += '<div class="d-flex flex-wrap gap-2 align-items-center" style="font-size: 0.78rem; color: var(--text-muted);">';
+        html += '<span class="badge bg-light text-dark" style="font-size: 0.72rem;">' + sourceLabel + '</span>';
+        if (item.tax_rate_import !== undefined && item.tax_rate_import !== null) {
+            html += '<span>关税 <strong style="color: var(--text-dark);">' + item.tax_rate_import + '%</strong></span>';
+        }
+        if (item.vat_rate !== undefined && item.vat_rate !== null) {
+            html += '<span>增值税 <strong style="color: var(--text-dark);">' + item.vat_rate + '%</strong></span>';
+        }
+        if (supervision) html += supervision;
+        html += '</div>';
+        // 海关查询快捷入口
+        const hsCode2 = (item.code || '').substring(0, 2);
+        html += '<div class="d-flex flex-wrap gap-1 mt-2" style="font-size: 0.7rem;">';
+        html += '<a href="https://www.customs.gov.cn/customs/302249/index.html" target="_blank" onclick="event.stopPropagation()" style="color: var(--accent-blue); text-decoration: none; padding: 2px 6px; border-radius: 4px; background: #e8f4fd;" title="海关总署归类查询"><i class="fas fa-landmark me-1"></i>海关总署</a>';
+        html += '<a href="https://www.singlewindow.cn/" target="_blank" onclick="event.stopPropagation()" style="color: var(--accent-blue); text-decoration: none; padding: 2px 6px; border-radius: 4px; background: #e8f4fd;" title="中国国际贸易单一窗口"><i class="fas fa-window-restore me-1"></i>单一窗口</a>';
+        html += '<a href="https://www.wcoomd.org/en/topics/nomenclature/hs-online-database.aspx" target="_blank" onclick="event.stopPropagation()" style="color: var(--accent-blue); text-decoration: none; padding: 2px 6px; border-radius: 4px; background: #e8f4fd;" title="WCO HS在线查询"><i class="fas fa-globe me-1"></i>WCO</a>';
+        html += '<a href="https://ec.europa.eu/taxation_customs/dds2/taric/taric_consultation.jsp" target="_blank" onclick="event.stopPropagation()" style="color: var(--accent-blue); text-decoration: none; padding: 2px 6px; border-radius: 4px; background: #e8f4fd;" title="欧盟TARIC查询"><i class="fas fa-eu me-1">🇪🇺</i>欧盟TARIC</a>';
+        html += '<a href="https://www.douane.gouv.fr/fr/outils-et-services/recherche-de-codes-tarifaires" target="_blank" onclick="event.stopPropagation()" style="color: var(--accent-blue); text-decoration: none; padding: 2px 6px; border-radius: 4px; background: #e8f4fd;" title="法国海关查询"><i class="fas fa-flag me-1">🇫🇷</i>法国海关</a>';
+        html += '<a href="https://online.customs.gov.cn/" target="_blank" onclick="event.stopPropagation()" style="color: var(--accent-blue); text-decoration: none; padding: 2px 6px; border-radius: 4px; background: #e8f4fd;" title="互联网+海关平台"><i class="fas fa-cloud me-1"></i>互联网+海关</a>';
+        html += '</div>';
+        html += '</div></div></div>';
+    });
+    html += '</div>';
+
+    // 渲染外部数据源结果
+    if (data.external_results && data.external_results.length > 0) {
+        const sources = data.external_sources || [];
+        const extTotal = data.external_total;
+        const showCount = 2; // 默认显示2行（6个卡片）
+        html += '<div class="mt-4 pt-3" style="border-top: 2px dashed var(--border-color);">';
+        html += '<div class="d-flex justify-content-between align-items-center mb-3">';
+        html += '<h6 style="font-weight: 700; color: var(--primary-dark); margin: 0;"><i class="fas fa-globe me-2" style="color: var(--accent-blue);"></i>外部权威数据源 <span class="badge bg-light text-dark ms-2">' + extTotal + ' 条</span></h6>';
+        html += '<div class="d-flex flex-wrap gap-1">';
+        sources.forEach(s => {
+            html += '<span class="badge" style="font-size: 0.7rem; background: #e8f4fd; color: var(--accent-blue); border: 1px solid #b3d7ee;">' + s + '</span>';
+        });
+        html += '</div></div>';
+        html += '<div id="extResultsGrid" class="row g-3">';
+        data.external_results.forEach((item, idx) => {
+            const srcIcon = item.source.includes('海关总署') ? '🇨🇳' : item.source.includes('WCO') ? '🌐' : item.source.includes('法国') ? '🇫🇷' : item.source.includes('UK') ? '🇬🇧' : '🔗';
+            const srcColor = item.source.includes('海关总署') ? '#c0392b' : item.source.includes('WCO') ? '#2980b9' : item.source.includes('法国') ? '#002395' : item.source.includes('UK') ? '#c8102e' : 'var(--accent-blue)';
+            const isHidden = idx >= showCount ? 'display:none;' : '';
+            const copyStr = (item.code||'') + ' | ' + (item.description_cn||'') + ' | ' + (item.description_en||'');
+            html += '<div class="col-lg-6 col-xl-4 ext-result-card" style="' + isHidden + '">';
+            html += '<div class="card h-100" style="border-left: 4px solid ' + srcColor + '; border-radius: 10px; cursor: pointer; transition: all 0.2s;" onclick="showExtDetail(' + idx + ')" onmouseover="this.style.boxShadow=\'0 4px 15px rgba(0,0,0,0.1)\'" onmouseout="this.style.boxShadow=\'none\'">';
+            html += '<div class="card-body" style="padding: 0.8rem 1rem;">';
+            html += '<div class="d-flex justify-content-between align-items-start mb-1">';
+            html += '<div>';
+            if (item.code) html += '<div style="font-family: \'Courier New\', monospace; font-size: 1.1rem; font-weight: 800; color: ' + srcColor + ';">' + item.code + '</div>';
+            html += '</div>';
+            html += '<div class="d-flex gap-1 align-items-center">';
+            html += '<button class="btn btn-sm p-0" style="font-size: 0.7rem; color: ' + srcColor + ';" onclick="event.stopPropagation();copyToClipboard(\'' + copyStr.replace(/'/g, "\\'") + '\')" title="复制"><i class="fas fa-copy"></i></button>';
+            html += '<span class="badge" style="font-size: 0.68rem; background: ' + srcColor + '22; color: ' + srcColor + '; border: 1px solid ' + srcColor + '44;">' + srcIcon + ' ' + item.source + '</span>';
+            html += '</div></div>';
+            if (item.description_cn) html += '<div style="font-size: 0.85rem; color: var(--text-dark); margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + item.description_cn + '</div>';
+            else if (item.description_en) html += '<div style="font-size: 0.85rem; color: var(--text-dark); margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + item.description_en + '</div>';
+            if (item.section) html += '<div style="font-size: 0.72rem; color: var(--text-muted);">Section: ' + item.section + '</div>';
+            html += '</div></div></div>';
+        });
+        html += '</div>';
+        if (extTotal > showCount) {
+            html += '<div class="text-center mt-3"><button class="btn btn-sm" style="background: var(--bg-light); color: var(--accent-blue); border-radius: 20px; padding: 5px 20px; font-size: 0.82rem;" onclick="toggleExtResults(this, ' + showCount + ')"><i class="fas fa-chevron-down me-1"></i>展开全部 ' + extTotal + ' 条结果</button></div>';
+        }
+        html += '</div>';
+        // 存储数据供详情弹窗使用
+        window._extResultsData = data.external_results;
+    }
+
+    container.innerHTML = html;
+}
+
+// 显示编码详情弹窗
+// 展开/折叠外部数据源结果
+function toggleExtResults(btn, showCount) {
+    const cards = document.querySelectorAll('.ext-result-card');
+    const isExpanded = btn.dataset.expanded === '1';
+    cards.forEach((card, idx) => {
+        card.style.display = (idx < showCount || isExpanded) ? '' : 'none';
+    });
+    if (isExpanded) {
+        btn.innerHTML = '<i class="fas fa-chevron-down me-1"></i>展开全部 ' + cards.length + ' 条结果';
+        btn.dataset.expanded = '0';
+    } else {
+        btn.innerHTML = '<i class="fas fa-chevron-up me-1"></i>收起';
+        btn.dataset.expanded = '1';
+    }
+}
+
+// 显示外部数据源详情弹窗
+function showExtDetail(idx) {
+    const item = (window._extResultsData || [])[idx];
+    if (!item) return;
+    const srcIcon = item.source.includes('海关总署') ? '🇨🇳' : item.source.includes('WCO') ? '🌐' : item.source.includes('法国') ? '🇫🇷' : item.source.includes('UK') ? '🇬🇧' : '🔗';
+    const srcColor = item.source.includes('海关总署') ? '#c0392b' : item.source.includes('WCO') ? '#2980b9' : item.source.includes('法国') ? '#002395' : item.source.includes('UK') ? '#c8102e' : 'var(--accent-blue)';
+    const copyStr = (item.code||'') + ' | ' + (item.description_cn||'') + ' | ' + (item.description_en||'');
+
+    let detailHtml = '<div style="text-align: center; padding: 1rem 0 0.8rem; border-bottom: 2px solid var(--border-color); margin-bottom: 1rem;">';
+    detailHtml += '<div style="font-family: \'Courier New\', monospace; font-size: 1.8rem; font-weight: 800; color: ' + srcColor + '; letter-spacing: 2px;">' + (item.code || '--') + '</div>';
+    detailHtml += '<span class="badge mt-2" style="font-size: 0.78rem; background: ' + srcColor + '22; color: ' + srcColor + '; border: 1px solid ' + srcColor + '44;">' + srcIcon + ' ' + item.source + '</span>';
+    detailHtml += '</div>';
+
+    if (item.description_cn) detailHtml += '<div style="font-size: 1rem; font-weight: 600; color: var(--text-dark); margin-bottom: 0.5rem;">' + item.description_cn + '</div>';
+    if (item.description_en) detailHtml += '<div style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">' + item.description_en + '</div>';
+
+    // 税率信息（中国海关数据）
+    if (item.tax_rate_import || item.vat_rate || item.export_rebate_rate) {
+        detailHtml += '<div style="background: var(--bg-light); border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">';
+        detailHtml += '<div style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.6rem; font-size: 0.88rem;"><i class="fas fa-percentage me-1" style="color: var(--success);"></i>税率信息</div>';
+        detailHtml += '<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">';
+        if (item.tax_rate_import) detailHtml += '<div style="background: #fff; border-radius: 8px; padding: 8px; text-align: center;"><div style="font-size: 0.72rem; color: var(--text-muted);">进口关税</div><div style="font-weight: 700; font-size: 1.05rem;">' + item.tax_rate_import + '%</div></div>';
+        if (item.vat_rate) detailHtml += '<div style="background: #fff; border-radius: 8px; padding: 8px; text-align: center;"><div style="font-size: 0.72rem; color: var(--text-muted);">增值税</div><div style="font-weight: 700; font-size: 1.05rem;">' + item.vat_rate + '%</div></div>';
+        if (item.export_rebate_rate) detailHtml += '<div style="background: #fff; border-radius: 8px; padding: 8px; text-align: center;"><div style="font-size: 0.72rem; color: var(--text-muted);">出口退税</div><div style="font-weight: 700; font-size: 1.05rem;">' + item.export_rebate_rate + '%</div></div>';
+        detailHtml += '</div></div>';
+    }
+
+    if (item.section) detailHtml += '<div style="font-size: 0.82rem; color: var(--text-muted);">Section: ' + item.section + ' | Level: ' + (item.level || '--') + '</div>';
+    if (item.update_time) detailHtml += '<div style="font-size: 0.82rem; color: var(--text-muted);">更新时间: ' + item.update_time + '</div>';
+    if (item.supervision_conditions && item.supervision_conditions.length > 0) {
+        detailHtml += '<div style="margin-top: 0.8rem; font-size: 0.82rem;"><span style="color: var(--text-muted);">监管条件：</span>';
+        item.supervision_conditions.forEach(s => { detailHtml += '<span class="badge bg-info me-1" style="font-size: 0.72rem;">' + s + '</span>'; });
+        detailHtml += '</div>';
+    }
+
+    detailHtml += '<div style="margin-top: 1rem; text-align: right;"><button class="btn btn-sm" style="background: ' + srcColor + '; color: #fff; border-radius: 8px; padding: 5px 16px; font-size: 0.82rem;" onclick="copyToClipboard(\'' + copyStr.replace(/'/g, "\\'") + '\')"><i class="fas fa-copy me-1"></i>一键复制</button></div>';
+
+    document.getElementById('codeDetailBody').innerHTML = detailHtml;
+    const modal = new bootstrap.Modal(document.getElementById('codeDetailModal'));
+    modal.show();
+}
+
+function showCodeDetail(code) {
+    const modal = new bootstrap.Modal(document.getElementById('codeDetailModal'));
+    const body = document.getElementById('codeDetailBody');
+    body.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin me-2"></i>加载详情...</div>';
+    modal.show();
+
+    fetch('/api/hs-detail/' + encodeURIComponent(code))
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.items && data.items.length > 0) {
+                const item = data.items[0];
+                const codeLen = (item.code || '').length;
+                const codeColor = codeLen <= 2 ? 'var(--info)' : codeLen <= 4 ? 'var(--accent-blue)' : codeLen <= 6 ? 'var(--success)' : 'var(--highlight-blue)';
+                const fullCode = (item.code || '').padEnd(10, '0');
+
+                let html = '';
+
+                // 顶部：HS编码 + 描述
+                html += '<div style="text-align: center; padding: 1.2rem 0 1rem; border-bottom: 2px solid var(--border-color); margin-bottom: 1.2rem;">';
+                html += '<div style="font-family: \'Courier New\', monospace; font-size: 2rem; font-weight: 800; color: ' + codeColor + '; letter-spacing: 2px; line-height: 1.2;">' + item.code + '</div>';
+                html += '<div style="font-family: \'Courier New\', monospace; font-size: 0.78rem; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 0.5rem;">' + fullCode + '</div>';
+                html += '<div>' + getLevelBadge(item.code_level) + '</div>';
+                html += '<div style="font-size: 1.05rem; font-weight: 600; color: var(--text-dark); margin-top: 0.6rem;">' + (item.description_cn || '--') + '</div>';
+                if (item.description_en) {
+                    html += '<div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.3rem;">' + item.description_en + '</div>';
+                }
+                // 一键复制按钮
+                const copyText = item.code + ' | ' + (item.description_cn || '') + ' | ' + (item.description_en || '') + ' | 关税:' + (item.tax_rate_import != null ? item.tax_rate_import + '%' : '--') + ' | 增值税:' + (item.vat_rate != null ? item.vat_rate + '%' : '--') + ' | 出口退税:' + (item.export_rebate_rate != null ? item.export_rebate_rate + '%' : '--');
+                html += '<div style="margin-top: 0.8rem; text-align: right;"><button class="btn btn-sm" style="background: var(--accent-blue); color: #fff; border-radius: 8px; padding: 5px 16px; font-size: 0.82rem;" onclick="copyToClipboard(\'' + copyText.replace(/'/g, "\\'") + '\')"><i class="fas fa-copy me-1"></i>一键复制</button></div>';
+                html += '</div>';
+
+                // 信息卡片网格
+                html += '<div class="row g-3">';
+
+                // 卡片1：基本信息
+                html += '<div class="col-sm-6">';
+                html += '<div style="background: var(--bg-light); border-radius: 10px; padding: 1rem 1.2rem;">';
+                html += '<div style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.8rem; font-size: 0.88rem;"><i class="fas fa-info-circle me-1" style="color: var(--accent-blue);"></i>基本信息</div>';
+                html += '<div style="display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 0.85rem;">';
+                html += '<span style="color: var(--text-muted);">数据来源</span><span>' + getSourceLabel(item.source) + '</span>';
+                html += '<span style="color: var(--text-muted);">计量单位</span><span>' + (item.unit || '--') + '</span>';
+                html += '<span style="color: var(--text-muted);">访问次数</span><span>' + (item.access_count || 0) + '</span>';
+                html += '</div></div></div>';
+
+                // 卡片2：税率信息
+                html += '<div class="col-sm-6">';
+                html += '<div style="background: var(--bg-light); border-radius: 10px; padding: 1rem 1.2rem;">';
+                html += '<div style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.8rem; font-size: 0.88rem;"><i class="fas fa-percentage me-1" style="color: var(--success);"></i>税率信息</div>';
+                html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem;">';
+                html += '<div style="background: #fff; border-radius: 8px; padding: 8px 10px; text-align: center;"><div style="color: var(--text-muted); font-size: 0.75rem;">进口关税</div><div style="font-weight: 700; font-size: 1.1rem; color: var(--text-dark);">' + (item.tax_rate_import !== null && item.tax_rate_import !== undefined ? item.tax_rate_import + '%' : '--') + '</div></div>';
+                html += '<div style="background: #fff; border-radius: 8px; padding: 8px 10px; text-align: center;"><div style="color: var(--text-muted); font-size: 0.75rem;">出口关税</div><div style="font-weight: 700; font-size: 1.1rem; color: var(--text-dark);">' + (item.tax_rate_export !== null && item.tax_rate_export !== undefined ? item.tax_rate_export + '%' : '--') + '</div></div>';
+                html += '<div style="background: #fff; border-radius: 8px; padding: 8px 10px; text-align: center;"><div style="color: var(--text-muted); font-size: 0.75rem;">增值税</div><div style="font-weight: 700; font-size: 1.1rem; color: var(--text-dark);">' + (item.vat_rate !== null && item.vat_rate !== undefined ? item.vat_rate + '%' : '--') + '</div></div>';
+                html += '<div style="background: #fff; border-radius: 8px; padding: 8px 10px; text-align: center;"><div style="color: var(--text-muted); font-size: 0.75rem;">出口退税</div><div style="font-weight: 700; font-size: 1.1rem; color: var(--text-dark);">' + (item.export_rebate_rate !== null && item.export_rebate_rate !== undefined ? item.export_rebate_rate + '%' : '--') + '</div></div>';
+                html += '</div>';
+                // 监管条件
+                html += '<div style="margin-top: 10px; font-size: 0.82rem;"><span style="color: var(--text-muted);">监管条件：</span>' + (item.customs_supervision ? item.customs_supervision.split(',').map(c => '<span class="badge bg-info me-1" style="font-size: 0.75rem;">' + c.trim() + '</span>').join('') : '<span style="color: var(--text-muted);">--</span>') + '</div>';
+                html += '</div></div>';
+
+                // 卡片3：两用物项（如果是）
+                if (item.is_dual_use) {
+                    html += '<div class="col-12">';
+                    html += '<div style="background: #fff5f5; border-radius: 10px; padding: 1rem 1.2rem; border: 1px solid #f5c6cb;">';
+                    html += '<div style="font-weight: 700; color: var(--danger); margin-bottom: 0.6rem; font-size: 0.88rem;"><i class="fas fa-exclamation-triangle me-1"></i>两用物项标记</div>';
+                    if (item.dual_use_category) {
+                        const cats = item.dual_use_category.split(';').map(c => c.trim()).filter(c => c);
+                        cats.forEach(cat => {
+                            html += '<span class="badge me-1 mb-1" style="background: var(--danger); color: #fff; font-size: 0.75rem; font-weight: 500;">' + cat + '</span>';
+                        });
+                    }
+                    html += '</div></div>';
+                }
+
+                html += '</div>';
+
+                // 子编码列表
+                if (data.children && data.children.length > 0) {
+                    html += '<h6 style="font-weight: 700; color: var(--primary-dark); margin: 1.5rem 0 1rem;"><i class="fas fa-sitemap me-1"></i>下级编码（' + data.children.length + '条）</h6>';
+                    html += '<div class="table-responsive"><table class="table table-sm table-custom" style="font-size: 0.85rem;">';
+                    html += '<thead><tr><th>编码</th><th>层级</th><th>描述</th><th>来源</th><th>访问</th></tr></thead><tbody>';
+                    data.children.forEach(child => {
+                        html += '<tr style="cursor: pointer;" onclick="showCodeDetail(\'' + child.code + '\')">';
+                        html += '<td><strong style="color: var(--accent-blue);">' + child.code + '</strong></td>';
+                        html += '<td>' + getLevelBadge(child.code_level || child.code.length) + '</td>';
+                        html += '<td>' + (child.description_cn || '--') + '</td>';
+                        html += '<td>' + getSourceLabel(child.source) + '</td>';
+                        html += '<td>' + (child.access_count || 0) + '</td>';
+                        html += '</tr>';
+                    });
+                    html += '</tbody></table></div>';
+                }
+
+                // 相关两用物项（最多显示3条）
+                if (item.is_dual_use && data.dual_use_items && data.dual_use_items.length > 0) {
+                    const showItems = data.dual_use_items.slice(0, 3);
+                    const totalCount = data.dual_use_items.length;
+                    html += '<div class="mt-3 p-3" style="background: #fde8e8; border-radius: 10px; border-left: 4px solid var(--danger);">';
+                    html += '<h6 style="font-weight: 700; color: var(--danger); margin-bottom: 0.8rem;"><i class="fas fa-exclamation-triangle me-1"></i>相关两用物项（共' + totalCount + '条，显示前3条）</h6>';
+                    showItems.forEach(du => {
+                        html += '<div class="mb-2" style="font-size: 0.85rem;">';
+                        html += '<strong>[' + du.category + ']</strong> ' + du.description;
+                        if (du.control_level) html += ' <span class="badge bg-warning text-dark">' + du.control_level + '</span>';
+                        if (du.license_required) html += ' <span class="badge" style="background: var(--danger); color: #fff;">需许可证</span>';
+                        html += '</div>';
+                    });
+                    if (totalCount > 3) {
+                        html += '<div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.5rem;">...还有 ' + (totalCount - 3) + ' 条相关两用物项，请前往<a href="/dual-use" style="color: var(--accent-blue);">两用物项页面</a>查看完整清单</div>';
+                    }
+                    html += '</div>';
+                }
+
+                body.innerHTML = html;
+            } else {
+                body.innerHTML = '<div class="text-center py-4" style="color: var(--text-muted);">未找到编码信息</div>';
+            }
+        })
+        .catch(err => {
+            body.innerHTML = '<div class="text-center py-4" style="color: var(--danger);">获取详情失败：' + err.message + '</div>';
+        });
+}
+
+// AI智能分类
+function aiClassifyHandler() {
+    const productName = document.getElementById('aiProductName').value.trim();
+    const productDesc = document.getElementById('aiProductDesc').value.trim();
+    const extraInfo = document.getElementById('aiExtraInfo').value.trim();
+    const direction = document.getElementById('aiDirection').value;
+
+    if (!productName) {
+        showToast('请输入产品名称', 'warning');
+        return;
+    }
+    if (!productDesc) {
+        showToast('请输入产品描述', 'warning');
+        return;
+    }
+
+    showLoading('AI正在分析...', '大语言模型正在对商品进行智能归类');
+
+    fetch('/api/classify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            product_name: productName,
+            product_desc: productDesc,
+            extra_info: extraInfo,
+            direction: direction
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        renderAIResult(data, productName);
+    })
+    .catch(err => {
+        hideLoading();
+        showToast('AI分类失败：' + err.message, 'danger');
+    });
+}
+
+// 渲染AI结果 - 兼容 /api/classify 返回的 classification 嵌套结构
+function renderAIResult(data, productName) {
+    const panel = document.getElementById('aiResultPanel');
+
+    // 提取分类结果（兼容两种格式）
+    let cls = null;
+    if (data.classification && typeof data.classification === 'object') {
+        cls = data.classification;
+    } else if (data.hs_code) {
+        cls = data; // 扁平格式
+    }
+
+    if (data.error && !cls) {
+        panel.innerHTML = '<div class="alert alert-danger-custom alert-custom"><i class="fas fa-times-circle me-2"></i>' + data.error + '</div>';
+        return;
+    }
+
+    if (!cls) {
+        panel.innerHTML = '<div class="alert alert-warning-custom alert-custom"><i class="fas fa-exclamation-circle me-2"></i>AI未能返回分类结果，请稍后重试或更换描述</div>';
+        return;
+    }
+
+    const hsCode = cls.hs_code || cls.code || '--';
+    const description = cls.description_cn || cls.description || '--';
+    const confidence = cls.confidence || 0;
+    const confidenceColor = confidence >= 80 ? 'var(--success)' : confidence >= 50 ? 'var(--warning)' : 'var(--danger)';
+    const confidenceWidth = Math.min(confidence, 100);
+
+    let html = '<div class="mb-4"><div class="d-flex align-items-center mb-3">';
+    html += '<div style="width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(135deg, var(--accent-blue), var(--light-blue)); display: flex; align-items: center; justify-content: center; margin-right: 1rem;">';
+    html += '<i class="fas fa-barcode" style="font-size: 1.5rem; color: #fff;"></i></div>';
+    html += '<div><div style="font-size: 1.5rem; font-weight: 800; color: var(--primary-dark);">' + hsCode + '</div>';
+    html += '<div style="font-size: 0.9rem; color: var(--text-muted);">' + description + '</div></div></div>';
+
+    // 置信度
+    html += '<div class="mb-3"><div class="d-flex justify-content-between mb-1">';
+    html += '<span style="font-size: 0.85rem; font-weight: 600;">分类置信度</span>';
+    html += '<span style="font-size: 0.85rem; font-weight: 700; color: ' + confidenceColor + ';">' + confidence + '%</span></div>';
+    html += '<div style="height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden;">';
+    html += '<div style="height: 100%; width: ' + confidenceWidth + '%; background: ' + confidenceColor + '; border-radius: 4px; transition: width 0.5s;"></div></div></div>';
+
+    // 模型信息
+    if (data.model_used) {
+        html += '<div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;"><i class="fas fa-robot me-1"></i>使用模型：' + data.model_used + '</div>';
+    }
+    html += '</div>';
+
+    // 备选编码
+    const alternatives = cls.alternative_codes || cls.alternatives || [];
+    if (alternatives.length > 0) {
+        html += '<div class="mb-4"><h6 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.8rem;"><i class="fas fa-list-ol me-1"></i>备选编码</h6>';
+        alternatives.forEach(function(alt, idx) {
+            const altConf = alt.confidence || 0;
+            const altColor = altConf >= 50 ? 'var(--warning)' : '#dee2e6';
+            const altTextColor = altConf >= 50 ? '#fff' : 'var(--text-muted)';
+            html += '<div class="d-flex align-items-center p-2 mb-2" style="background: var(--bg-light); border-radius: 8px;">';
+            html += '<span class="badge bg-secondary me-3">' + (idx + 1) + '</span>';
+            html += '<div><strong style="color: var(--accent-blue);">' + (alt.code || '--') + '</strong>';
+            html += '<span style="color: var(--text-muted); font-size: 0.85rem; margin-left: 8px;">' + (alt.description || '') + '</span></div>';
+            html += '<span class="ms-auto badge" style="background: ' + altColor + '; color: ' + altTextColor + ';">' + altConf + '%</span></div>';
+        });
+        html += '</div>';
+    }
+
+    // 申报要素
+    const declElements = cls.declaration_elements || [];
+    if (declElements.length > 0) {
+        html += '<div class="mb-4"><h6 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.8rem;"><i class="fas fa-file-alt me-1"></i>申报要素</h6>';
+        html += '<div class="table-responsive"><table class="table table-sm" style="font-size: 0.88rem;"><tbody>';
+        declElements.forEach(function(elem) {
+            html += '<tr><td style="font-weight: 600; width: 120px; color: var(--text-muted);">' + elem.name + '</td><td>' + (elem.value || '--') + '</td></tr>';
+        });
+        html += '</tbody></table></div></div>';
+    }
+
+    // 两用物项风险
+    const dualUseRisk = cls.dual_use_risk || null;
+    const isDualUse = data.is_dual_use || cls.is_dual_use || false;
+    if (dualUseRisk || isDualUse) {
+        const riskLevel = dualUseRisk ? (dualUseRisk.level || 'low') : 'low';
+        const riskColor = riskLevel === 'high' ? 'var(--danger)' : riskLevel === 'medium' ? 'var(--warning)' : 'var(--success)';
+        const riskText = riskLevel === 'high' ? '高风险' : riskLevel === 'medium' ? '中风险' : '低风险';
+        const riskBg = riskLevel === 'high' ? '#fde8e8' : riskLevel === 'medium' ? '#fef9e7' : '#e8f8f5';
+        html += '<div class="mb-4 p-3" style="background: ' + riskBg + '; border-radius: 10px; border-left: 4px solid ' + riskColor + ';">';
+        html += '<h6 style="font-weight: 700; color: ' + riskColor + '; margin-bottom: 0.5rem;"><i class="fas fa-exclamation-triangle me-1"></i>两用物项风险：' + riskText + '</h6>';
+        html += '<p style="font-size: 0.88rem; margin-bottom: 0;">' + (dualUseRisk ? (dualUseRisk.description || '未检测到两用物项风险') : '该商品可能涉及两用物项管控') + '</p>';
+        if (dualUseRisk && dualUseRisk.license_required) {
+            html += '<p style="font-size: 0.85rem; margin-top: 0.5rem;"><strong>许可证要求：</strong>' + dualUseRisk.license_required + '</p>';
+        }
+        html += '</div>';
+    }
+
+    // 知识库匹配
+    if (data.knowledge && data.knowledge.hs_code) {
+        html += '<div class="mb-4 p-3" style="background: #e8f8f5; border-radius: 10px; border-left: 4px solid var(--success);">';
+        html += '<h6 style="font-weight: 700; color: var(--success); margin-bottom: 0.5rem;"><i class="fas fa-database me-1"></i>知识库匹配</h6>';
+        html += '<p style="font-size: 0.88rem; margin-bottom: 0;">历史记录建议编码：<strong>' + data.knowledge.hs_code + '</strong>（置信度：' + (data.knowledge.confidence || 0) + '%，使用' + (data.knowledge.usage_count || 0) + '次）</p>';
+        html += '</div>';
+    }
+
+    // 反馈按钮
+    html += '<div class="mt-4 pt-3" style="border-top: 1px solid var(--border-color);">';
+    html += '<p style="font-size: 0.88rem; font-weight: 600; color: var(--text-dark); margin-bottom: 0.8rem;"><i class="fas fa-thumbs-up me-1"></i>分类结果是否正确？</p>';
+    html += '<div class="d-flex gap-2">';
+    html += '<button class="btn btn-sm" style="background: var(--success); color: #fff; border-radius: 8px; padding: 6px 16px;" onclick="submitFeedback(\'' + hsCode + '\', \'' + (productName || '').replace(/'/g, "\\'") + '\', \'correct\')"><i class="fas fa-check me-1"></i>正确</button>';
+    html += '<button class="btn btn-sm" style="background: var(--warning); color: #fff; border-radius: 8px; padding: 6px 16px;" onclick="submitFeedback(\'' + hsCode + '\', \'' + (productName || '').replace(/'/g, "\\'") + '\', \'partial\')"><i class="fas fa-adjust me-1"></i>部分正确</button>';
+    html += '<button class="btn btn-sm" style="background: var(--danger); color: #fff; border-radius: 8px; padding: 6px 16px;" onclick="submitFeedback(\'' + hsCode + '\', \'' + (productName || '').replace(/'/g, "\\'") + '\', \'incorrect\')"><i class="fas fa-times me-1"></i>不正确</button>';
+    html += '</div></div>';
+
+    panel.innerHTML = html;
+}
+
+// 提交反馈 - 修复：传入 product_name 参数
+function submitFeedback(code, productName, feedback) {
+    fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hs_code: code, product_name: productName, feedback: feedback })
+    })
+    .then(response => response.json())
+    .then(data => {
+        showToast(data.message || '感谢您的反馈！', data.success ? 'success' : 'warning');
+    })
+    .catch(err => {
+        showToast('反馈提交失败', 'danger');
+    });
+}
+
+function copyCode(code, desc) {
+    copyToClipboard(code + ' ' + desc);
+}
+
+function copyToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+            showToast('已复制到剪贴板', 'success');
+        }).catch(() => {
+            fallbackCopy(text);
+        });
+    } else {
+        fallbackCopy(text);
+    }
+}
+
+function fallbackCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+        document.execCommand('copy');
+        showToast('已复制到剪贴板', 'success');
+    } catch (e) {
+        showToast('复制失败，请手动复制', 'warning');
+    }
+    document.body.removeChild(ta);
+}
+
+// Toast提示
+function showToast(message, type) {
+    const iconMap = { success: 'check-circle', danger: 'times-circle', warning: 'exclamation-circle', info: 'info-circle' };
+    const toast = document.createElement('div');
+    toast.className = 'alert alert-' + type + ' alert-custom alert-dismissible fade show';
+    toast.style.cssText = 'position: fixed; top: 80px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = '<i class="fas fa-' + (iconMap[type] || 'info-circle') + ' me-2"></i>' + message +
+        '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.remove(); }, 3000);
+}
+
+// 回车搜索
+document.getElementById('searchKeyword').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') searchHandler();
+});
+
+// URL参数自动搜索
+document.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    const keyword = params.get('keyword');
+    if (keyword) {
+        document.getElementById('searchKeyword').value = keyword;
+        searchHandler();
+    }
+    // AI tab hash
+    if (window.location.hash === '#ai-tab') {
+        const aiTab = new bootstrap.Tab(document.getElementById('ai-tab'));
+        aiTab.show();
+    }
+});
+</script>
+{% endblock %}

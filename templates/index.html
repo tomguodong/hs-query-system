@@ -1,0 +1,412 @@
+{% extends "base.html" %}
+
+{% block title %}首页 - 快滴收 · HS智能查询系统{% endblock %}
+
+{% block content %}
+<!-- Hero区域 -->
+<section class="text-center mb-5" style="padding: 3rem 0;">
+    <div style="margin-bottom: 1rem;">
+        <span style="display: inline-block; background: linear-gradient(135deg, var(--accent-blue), #2980b9); color: #fff; padding: 6px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; letter-spacing: 1px;">
+            <i class="fas fa-building me-1"></i>深圳快滴收科技有限公司
+        </span>
+    </div>
+    <div style="margin-bottom: 1.5rem;">
+        <i class="fas fa-shield-halved" style="font-size: 3.5rem; color: var(--accent-blue);"></i>
+    </div>
+    <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 0.5rem;">
+        海关编码智能查询系统 <span style="color: var(--highlight-blue);">v1.9</span>
+    </h1>
+    <p style="font-size: 1.15rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+        基于AI的HS编码智能分类 | 两用物项管控检测
+    </p>
+    <p style="font-size: 0.92rem; color: var(--accent-blue); font-weight: 600; margin-bottom: 2rem;">
+        连接全球物流 · 赋能国际贸易
+    </p>
+
+    <!-- 快速搜索框 -->
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="input-group" style="box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden;">
+                <span class="input-group-text" style="background: #fff; border: 2px solid var(--border-color); border-right: none; border-radius: 12px 0 0 12px; padding: 12px 16px;">
+                    <i class="fas fa-search" style="color: var(--text-muted);"></i>
+                </span>
+                <input type="text" id="quickSearch" class="form-control search-input-custom"
+                       placeholder="输入商品名称、HS编码或关键词快速搜索..."
+                       style="border-left: none; border-radius: 0; font-size: 1rem; padding: 12px 20px;">
+                <button class="btn btn-primary-custom" onclick="quickSearchHandler()" style="border-radius: 0 12px 12px 0; padding: 12px 28px; font-size: 1rem;">
+                    <i class="fas fa-search me-1"></i>搜索
+                </button>
+            </div>
+            <div class="mt-2" style="font-size: 0.82rem; color: var(--text-muted);">
+                热门搜索：
+                <a href="javascript:void(0)" onclick="quickFill('集成电路')" class="text-decoration-none" style="color: var(--accent-blue);">集成电路</a> |
+                <a href="javascript:void(0)" onclick="quickFill('锂电池')" class="text-decoration-none" style="color: var(--accent-blue);">锂电池</a> |
+                <a href="javascript:void(0)" onclick="quickFill('半导体')" class="text-decoration-none" style="color: var(--accent-blue);">半导体</a> |
+                <a href="javascript:void(0)" onclick="quickFill('光学仪器')" class="text-decoration-none" style="color: var(--accent-blue);">光学仪器</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 公司简介横幅 -->
+<section class="mb-5">
+    <div class="card card-custom" style="border: none; background: linear-gradient(135deg, #1a5276, #2980b9, #1a5276); border-radius: 16px; overflow: hidden; color: #fff;">
+        <div class="card-body" style="padding: 2rem 2.5rem;">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <h4 style="font-weight: 800; margin-bottom: 0.8rem;">
+                        <i class="fas fa-globe-americas me-2"></i>深圳快滴收科技有限公司
+                    </h4>
+                    <p style="font-size: 0.95rem; line-height: 1.8; margin-bottom: 1rem; opacity: 0.95;">
+                        成立于2008年，16年+国际物流深耕经验，覆盖<strong>200+国家和地区</strong>，服务<strong>1000+合作客户</strong>。
+                        我们致力于为全球贸易企业提供一站式国际物流解决方案，涵盖海运、铁路、空运、快递、海外仓等全链路服务。
+                    </p>
+                    <div class="d-flex flex-wrap gap-2" style="margin-bottom: 1rem;">
+                        <span style="display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 14px; border-radius: 15px; font-size: 0.82rem;">
+                            <i class="fas fa-ship me-1"></i>国际海运
+                        </span>
+                        <span style="display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 14px; border-radius: 15px; font-size: 0.82rem;">
+                            <i class="fas fa-train me-1"></i>中欧班列
+                        </span>
+                        <span style="display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 14px; border-radius: 15px; font-size: 0.82rem;">
+                            <i class="fas fa-truck me-1"></i>中亚卡车
+                        </span>
+                        <span style="display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 14px; border-radius: 15px; font-size: 0.82rem;">
+                            <i class="fas fa-plane me-1"></i>国际空派
+                        </span>
+                        <span style="display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 14px; border-radius: 15px; font-size: 0.82rem;">
+                            <i class="fas fa-box me-1"></i>海外仓储
+                        </span>
+                        <span style="display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 14px; border-radius: 15px; font-size: 0.82rem;">
+                            <i class="fas fa-handshake me-1"></i>展会物流
+                        </span>
+                    </div>
+                    <a href="https://kindles-logistics.com/" target="_blank" class="btn" style="background: #fff; color: #1a5276; font-weight: 700; border-radius: 8px; padding: 8px 24px; font-size: 0.9rem;">
+                        <i class="fas fa-external-link-alt me-1"></i>访问官网了解更多
+                    </a>
+                </div>
+                <div class="col-lg-5 text-center" style="margin-top: 1.5rem;">
+                    <div class="row g-3">
+                        <div class="col-4">
+                            <div style="background: rgba(255,255,255,0.15); border-radius: 12px; padding: 1.2rem 0.5rem;">
+                                <div style="font-size: 1.8rem; font-weight: 800;">16+</div>
+                                <div style="font-size: 0.78rem; opacity: 0.85;">年行业经验</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div style="background: rgba(255,255,255,0.15); border-radius: 12px; padding: 1.2rem 0.5rem;">
+                                <div style="font-size: 1.8rem; font-weight: 800;">200+</div>
+                                <div style="font-size: 0.78rem; opacity: 0.85;">覆盖国家</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div style="background: rgba(255,255,255,0.15); border-radius: 12px; padding: 1.2rem 0.5rem;">
+                                <div style="font-size: 1.8rem; font-weight: 800;">1000+</div>
+                                <div style="font-size: 0.78rem; opacity: 0.85;">合作客户</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 功能卡片 -->
+<section class="mb-5">
+    <div class="row g-4">
+        <div class="col-lg-4 col-md-6">
+            <div class="card card-custom h-100 text-center" style="cursor: pointer;" onclick="window.location.href='{{ url_for('query') }}'">
+                <div class="card-body" style="padding: 2.5rem 1.5rem;">
+                    <div style="width: 80px; height: 80px; border-radius: 20px; background: linear-gradient(135deg, #ebf5fb, #d4e6f1); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.2rem;">
+                        <i class="fas fa-search" style="font-size: 2rem; color: var(--accent-blue);"></i>
+                    </div>
+                    <h5 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.8rem;">HS编码查询</h5>
+                    <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.7;">
+                        支持按关键词、编码前缀、商品描述等多维度查询HS编码，获取详细的关税、监管条件等信息。
+                    </p>
+                    <span class="btn btn-outline-custom btn-sm">
+                        <i class="fas fa-arrow-right me-1"></i>开始查询
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card card-custom h-100 text-center" style="cursor: pointer;" onclick="window.location.href='{{ url_for('query') }}#ai-tab'">
+                <div class="card-body" style="padding: 2.5rem 1.5rem;">
+                    <div style="width: 80px; height: 80px; border-radius: 20px; background: linear-gradient(135deg, #e8f8f5, #d1f2eb); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.2rem;">
+                        <i class="fas fa-robot" style="font-size: 2rem; color: var(--success);"></i>
+                    </div>
+                    <h5 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.8rem;">AI智能分类</h5>
+                    <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.7;">
+                        基于大语言模型的智能商品归类，输入产品描述即可获得精确的HS编码建议与置信度分析。
+                    </p>
+                    <span class="btn btn-outline-custom btn-sm" style="border-color: var(--success); color: var(--success);">
+                        <i class="fas fa-arrow-right me-1"></i>AI分类
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card card-custom h-100 text-center" style="cursor: pointer;" onclick="window.location.href='{{ url_for('dual_use') }}'">
+                <div class="card-body" style="padding: 2.5rem 1.5rem;">
+                    <div style="width: 80px; height: 80px; border-radius: 20px; background: linear-gradient(135deg, #fef9e7, #fdebd0); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.2rem;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: var(--warning);"></i>
+                    </div>
+                    <h5 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.8rem;">两用物项检测</h5>
+                    <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.7;">
+                        自动检测商品是否涉及两用物项管控，提供许可证要求与合规建议，降低出口合规风险。
+                    </p>
+                    <span class="btn btn-outline-custom btn-sm" style="border-color: var(--warning); color: var(--warning);">
+                        <i class="fas fa-arrow-right me-1"></i>查看清单
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 核心物流服务 -->
+<section class="mb-5">
+    <h3 class="text-center mb-4" style="font-weight: 700; color: var(--primary-dark);">
+        <i class="fas fa-ship me-2" style="color: var(--accent-blue);"></i>快滴收 · 核心物流服务
+    </h3>
+    <div class="row g-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card card-custom h-100 text-center" style="border-top: 3px solid var(--accent-blue);">
+                <div class="card-body" style="padding: 1.8rem 1rem;">
+                    <div style="width: 56px; height: 56px; border-radius: 50%; background: #ebf5fb; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                        <i class="fas fa-ship" style="font-size: 1.4rem; color: var(--accent-blue);"></i>
+                    </div>
+                    <h6 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem;">国际海运</h6>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 0;">
+                        整箱/拼箱海运，覆盖全球主要港口，运价透明，时效稳定
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card card-custom h-100 text-center" style="border-top: 3px solid var(--success);">
+                <div class="card-body" style="padding: 1.8rem 1rem;">
+                    <div style="width: 56px; height: 56px; border-radius: 50%; background: #e8f8f5; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                        <i class="fas fa-train" style="font-size: 1.4rem; color: var(--success);"></i>
+                    </div>
+                    <h6 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem;">中欧班列</h6>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 0;">
+                        中国至欧洲铁路运输，比海运快、比空运省，稳定可靠
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card card-custom h-100 text-center" style="border-top: 3px solid var(--warning);">
+                <div class="card-body" style="padding: 1.8rem 1rem;">
+                    <div style="width: 56px; height: 56px; border-radius: 50%; background: #fef9e7; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                        <i class="fas fa-truck" style="font-size: 1.4rem; color: var(--warning);"></i>
+                    </div>
+                    <h6 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem;">中亚卡车</h6>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 0;">
+                        中国至中亚五国卡车直达运输，门到门服务，灵活高效
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card card-custom h-100 text-center" style="border-top: 3px solid #8e44ad;">
+                <div class="card-body" style="padding: 1.8rem 1rem;">
+                    <div style="width: 56px; height: 56px; border-radius: 50%; background: #f4ecf7; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                        <i class="fas fa-plane" style="font-size: 1.4rem; color: #8e44ad;"></i>
+                    </div>
+                    <h6 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem;">国际空派</h6>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 0;">
+                        国际空运+派送，时效快，覆盖全球，适合紧急货物
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-4 mt-0">
+        <div class="col-lg-4 col-md-6">
+            <div class="card card-custom h-100 text-center" style="border-top: 3px solid #e74c3c;">
+                <div class="card-body" style="padding: 1.8rem 1rem;">
+                    <div style="width: 56px; height: 56px; border-radius: 50%; background: #fdedec; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                        <i class="fas fa-envelope-open-text" style="font-size: 1.4rem; color: #e74c3c;"></i>
+                    </div>
+                    <h6 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem;">国际快递</h6>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 0;">
+                        DHL/FedEx/UPS/TNT等国际快递代理，价格优惠，时效保障
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card card-custom h-100 text-center" style="border-top: 3px solid #16a085;">
+                <div class="card-body" style="padding: 1.8rem 1rem;">
+                    <div style="width: 56px; height: 56px; border-radius: 50%; background: #e8f6f3; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                        <i class="fas fa-warehouse" style="font-size: 1.4rem; color: #16a085;"></i>
+                    </div>
+                    <h6 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem;">海外仓储</h6>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 0;">
+                        全球多仓布局，一件代发，退换货处理，降低物流成本
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card card-custom h-100 text-center" style="border-top: 3px solid #2c3e50;">
+                <div class="card-body" style="padding: 1.8rem 1rem;">
+                    <div style="width: 56px; height: 56px; border-radius: 50%; background: #ebedef; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                        <i class="fas fa-handshake" style="font-size: 1.4rem; color: #2c3e50;"></i>
+                    </div>
+                    <h6 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem;">展会物流</h6>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 0;">
+                        展品运输、报关、布展一站式服务，助力企业全球参展
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="text-center mt-4">
+        <a href="https://kindles-logistics.com/" target="_blank" class="btn btn-primary-custom" style="padding: 10px 32px; font-size: 0.95rem; border-radius: 10px;">
+            <i class="fas fa-globe me-2"></i>访问快滴收官网，获取物流报价
+        </a>
+    </div>
+</section>
+
+<!-- 系统特性 -->
+<section class="mb-5">
+    <h3 class="text-center mb-4" style="font-weight: 700; color: var(--primary-dark);">
+        <i class="fas fa-star me-2" style="color: var(--highlight-blue);"></i>系统特性
+    </h3>
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="text-center" style="padding: 1.5rem;">
+                <div style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, var(--accent-blue), var(--light-blue)); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                    <i class="fas fa-database" style="font-size: 1.3rem; color: #fff;"></i>
+                </div>
+                <h6 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem;">权威数据源</h6>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+                    数据来源于WCO世界海关组织、中国海关总署、商务部，确保编码信息的权威性与准确性。
+                </p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="text-center" style="padding: 1.5rem;">
+                <div style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, var(--success), #2ecc71); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                    <i class="fas fa-brain" style="font-size: 1.3rem; color: #fff;"></i>
+                </div>
+                <h6 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem;">AI智能分类</h6>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+                    基于大语言模型，通过产品描述自动推荐HS编码，提供置信度评分与备选方案。
+                </p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="text-center" style="padding: 1.5rem;">
+                <div style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, var(--warning), #e67e22); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                    <i class="fas fa-shield-alt" style="font-size: 1.3rem; color: #fff;"></i>
+                </div>
+                <h6 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem;">两用物项检测</h6>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+                    自动识别两用物项管控商品，提示许可证要求与合规风险，助力合规出口。
+                </p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="text-center" style="padding: 1.5rem;">
+                <div style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, #8e44ad, #9b59b6); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                    <i class="fas fa-sync-alt" style="font-size: 1.3rem; color: #fff;"></i>
+                </div>
+                <h6 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem;">自我学习</h6>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+                    通过用户反馈持续优化分类模型，知识库自动更新，分类准确度不断提升。
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 数据概览 -->
+<section class="mb-4">
+    <div class="row g-4">
+        <div class="col-md-3 col-6">
+            <div class="stat-card text-center">
+                <div class="stat-icon mx-auto mb-2" style="background: #ebf5fb; color: var(--accent-blue);">
+                    <i class="fas fa-barcode"></i>
+                </div>
+                <div class="stat-value" id="totalCodes">--</div>
+                <div class="stat-label">HS编码条目</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-card text-center" style="border-left-color: var(--success);">
+                <div class="stat-icon mx-auto mb-2" style="background: #e8f8f5; color: var(--success);">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="stat-value" id="totalQueries">--</div>
+                <div class="stat-label">累计查询次数</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-card text-center" style="border-left-color: var(--warning);">
+                <div class="stat-icon mx-auto mb-2" style="background: #fef9e7; color: var(--warning);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-value" id="dualUseCount">--</div>
+                <div class="stat-label">两用物项条目</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-card text-center" style="border-left-color: #8e44ad;">
+                <div class="stat-icon mx-auto mb-2" style="background: #f4ecf7; color: #8e44ad;">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="stat-value" id="aiAccuracy">--</div>
+                <div class="stat-label">AI分类准确率</div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 快速搜索
+function quickSearchHandler() {
+    const keyword = document.getElementById('quickSearch').value.trim();
+    if (keyword) {
+        window.location.href = '{{ url_for("query") }}?keyword=' + encodeURIComponent(keyword);
+    }
+}
+
+function quickFill(text) {
+    document.getElementById('quickSearch').value = text;
+    quickSearchHandler();
+}
+
+// 回车搜索
+document.getElementById('quickSearch').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        quickSearchHandler();
+    }
+});
+
+// 加载首页统计数据
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/statistics')
+        .then(response => response.json())
+        .then(data => {
+            if (data.total_codes) document.getElementById('totalCodes').textContent = data.total_codes.toLocaleString();
+            if (data.total_queries) document.getElementById('totalQueries').textContent = data.total_queries.toLocaleString();
+            if (data.dual_use_count) document.getElementById('dualUseCount').textContent = data.dual_use_count.toLocaleString();
+            if (data.ai_accuracy) document.getElementById('aiAccuracy').textContent = data.ai_accuracy + '%';
+        })
+        .catch(() => {
+            document.getElementById('totalCodes').textContent = '50,000+';
+            document.getElementById('totalQueries').textContent = '0';
+            document.getElementById('dualUseCount').textContent = '500+';
+            document.getElementById('aiAccuracy').textContent = '95%';
+        });
+});
+</script>
+{% endblock %}

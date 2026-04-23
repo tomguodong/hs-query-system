@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}海关编码智能查询系统{% endblock %} - 深圳快滴收科技</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #0a1628;
+            --primary-blue: #0d2b4e;
+            --accent-blue: #1a5276;
+            --light-blue: #2980b9;
+            --highlight-blue: #3498db;
+            --bg-light: #f0f4f8;
+            --text-dark: #1a1a2e;
+            --text-muted: #6c757d;
+            --border-color: #dee2e6;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --info: #3498db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB",
+                         "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 导航栏 */
+        .navbar-custom {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-blue) 50%, var(--accent-blue) 100%);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+            padding: 0.6rem 0;
+            z-index: 1050;
+        }
+
+        .navbar-custom .navbar-brand {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1.25rem;
+            letter-spacing: 0.5px;
+        }
+
+        .navbar-custom .navbar-brand i {
+            color: var(--highlight-blue);
+            margin-right: 8px;
+        }
+
+        .navbar-custom .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.92rem;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            margin: 0 2px;
+        }
+
+        .navbar-custom .nav-link:hover,
+        .navbar-custom .nav-link.active {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .navbar-custom .nav-link i {
+            margin-right: 5px;
+        }
+
+        .navbar-custom .dropdown-menu {
+            background: var(--primary-blue);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .navbar-custom .dropdown-item {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .navbar-custom .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .user-badge {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        /* Flash消息 */
+        .flash-container {
+            margin-top: 20px;
+        }
+
+        .alert-custom {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .alert-success-custom {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-danger-custom {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border-left: 4px solid var(--danger);
+        }
+
+        .alert-warning-custom {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border-left: 4px solid var(--warning);
+        }
+
+        .alert-info-custom {
+            background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+            color: #0c5460;
+            border-left: 4px solid var(--info);
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            padding: 2rem 0;
+        }
+
+        /* 页脚 */
+        .footer-custom {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-blue) 100%);
+            color: rgba(255, 255, 255, 0.75);
+            padding: 2rem 0 1.5rem;
+            margin-top: auto;
+        }
+
+        .footer-custom h6 {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .footer-custom a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-custom a:hover {
+            color: var(--highlight-blue);
+        }
+
+        .footer-custom .data-source {
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .footer-custom .data-source i {
+            margin-right: 4px;
+        }
+
+        .footer-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 1.5rem 0;
+        }
+
+        .footer-bottom {
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* 通用卡片 */
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            transition: transform 0.3s, box-shadow 0.3s;
+            overflow: hidden;
+        }
+
+        .card-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-custom .card-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
+            color: #ffffff;
+            font-weight: 600;
+            border: none;
+            padding: 1rem 1.25rem;
+        }
+
+        .card-custom .card-body {
+            padding: 1.5rem;
+        }
+
+        /* 统计卡片 */
+        .stat-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            border-left: 4px solid var(--highlight-blue);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-card .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .stat-card .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* 按钮样式 */
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--accent-blue), var(--light-blue));
+            border: none;
+            color: #ffffff;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary-custom:hover {
+            background: linear-gradient(135deg, var(--light-blue), var(--highlight-blue));
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(41, 128, 185, 0.4);
+        }
+
+        .btn-outline-custom {
+            border: 2px solid var(--accent-blue);
+            color: var(--accent-blue);
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+            background: transparent;
+        }
+
+        .btn-outline-custom:hover {
+            background: var(--accent-blue);
+            color: #ffffff;
+        }
+
+        /* 表格样式 */
+        .table-custom {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .table-custom thead {
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
+            color: #ffffff;
+        }
+
+        .table-custom thead th {
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 12px 16px;
+            border: none;
+        }
+
+        .table-custom tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        .table-custom tbody tr:hover {
+            background-color: rgba(41, 128, 185, 0.05);
+        }
+
+        .table-custom tbody td {
+            padding: 12px 16px;
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+
+        /* 分页 */
+        .pagination-custom .page-link {
+            color: var(--accent-blue);
+            border: 1px solid var(--border-color);
+            padding: 8px 14px;
+            margin: 0 2px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .pagination-custom .page-link:hover {
+            background-color: var(--accent-blue);
+            color: #ffffff;
+            border-color: var(--accent-blue);
+        }
+
+        .pagination-custom .page-item.active .page-link {
+            background-color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        /* 徽章 */
+        .badge-success {
+            background-color: var(--success);
+        }
+
+        .badge-warning {
+            background-color: var(--warning);
+        }
+
+        .badge-danger {
+            background-color: var(--danger);
+        }
+
+        .badge-info {
+            background-color: var(--info);
+        }
+
+        /* 加载动画 */
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(41, 128, 185, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--highlight-blue);
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 22, 40, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-box {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 2rem 3rem;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .loading-box .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border-width: 5px;
+            margin-bottom: 1rem;
+        }
+
+        /* 搜索框 */
+        .search-input-custom {
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .search-input-custom:focus {
+            border-color: var(--highlight-blue);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+            outline: none;
+        }
+
+        /* Tab样式 */
+        .nav-tabs-custom .nav-link {
+            color: var(--text-muted);
+            font-weight: 500;
+            border: none;
+            padding: 12px 24px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .nav-tabs-custom .nav-link:hover {
+            color: var(--accent-blue);
+            border-bottom-color: rgba(41, 128, 185, 0.3);
+        }
+
+        .nav-tabs-custom .nav-link.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+            background: transparent;
+        }
+
+        /* 页面标题 */
+        .page-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .navbar-custom .navbar-brand {
+                font-size: 1.05rem;
+            }
+            .navbar-custom .nav-link {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.85rem;
+            }
+            .main-content {
+                padding: 1rem 0;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-shield-halved"></i> 快滴收 · HS智能查询
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">
+                            <i class="fas fa-home"></i>首页
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'query' %}active{% endif %}" href="{{ url_for('query') }}">
+                            <i class="fas fa-search"></i>HS查询
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'dual_use' %}active{% endif %}" href="{{ url_for('dual_use') }}">
+                            <i class="fas fa-exclamation-triangle"></i>两用物项
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'hs_resources' %}active{% endif %}" href="{{ url_for('hs_resources') }}">
+                            <i class="fas fa-link me-1"></i>查询资源
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'statistics' %}active{% endif %}" href="{{ url_for('statistics') }}">
+                            <i class="fas fa-chart-bar"></i>数据统计
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'history' %}active{% endif %}" href="{{ url_for('history') }}">
+                            <i class="fas fa-history"></i>查询历史
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'ai_chat' %}active{% endif %}" href="{{ url_for('ai_chat') }}" style="color: var(--highlight-blue); font-weight: 600;">
+                            <i class="fas fa-robot me-1"></i>AI助手
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'about' %}active{% endif %}" href="{{ url_for('about') }}">
+                            <i class="fas fa-building me-1"></i>公司介绍
+                        </a>
+                    </li>
+                    {% if current_user and current_user.is_authenticated and current_user.is_admin %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'admin' %}active{% endif %}" href="{{ url_for('admin') }}">
+                            <i class="fas fa-cog"></i>管理后台
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if session.get('user_id') %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user-circle"></i> {{ session.get('username', '用户') }}
+                        </a>
+                    </li>
+                    {% if session.get('role') == 'admin' %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'admin' %}active{% endif %}" href="{{ url_for('admin') }}">
+                            <i class="fas fa-cog"></i>管理
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt"></i>退出
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">
+                            <i class="fas fa-sign-in-alt"></i>登录
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('register') }}">
+                            <i class="fas fa-user-plus"></i>注册
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash消息 -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="container flash-container">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-custom alert-dismissible fade show" role="alert">
+            {% if category == 'success' %}
+            <i class="fas fa-check-circle me-2"></i>
+            {% elif category == 'danger' or category == 'error' %}
+            <i class="fas fa-times-circle me-2"></i>
+            {% elif category == 'warning' %}
+            <i class="fas fa-exclamation-circle me-2"></i>
+            {% else %}
+            <i class="fas fa-info-circle me-2"></i>
+            {% endif %}
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        <script>
+            document.querySelectorAll('.flash-container .alert').forEach(function(alert) {
+                setTimeout(function() {
+                    var bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                    if (bsAlert) bsAlert.close();
+                }, 5000);
+            });
+        </script>
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer-custom">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <h6><i class="fas fa-building me-2"></i>深圳快滴收科技有限公司</h6>
+                    <p style="font-size: 0.85rem; line-height: 1.8; margin-bottom: 0.8rem;">
+                        <strong>连接全球物流 · 赋能国际贸易</strong>
+                    </p>
+                    <p style="font-size: 0.82rem; line-height: 1.8; color: var(--text-muted);">
+                        16年+国际物流经验 | 覆盖200+国家和地区 | 1000+合作客户<br>
+                        国际海运 · 中欧班列 · 中亚卡车 · 国际快递 · 国际空派 · 海外仓 · 展会物流
+                    </p>
+                    <div style="margin-top: 0.8rem;">
+                        <a href="https://kindles-logistics.com/" target="_blank" class="btn btn-sm" style="background: var(--accent-blue); color: #fff; border-radius: 6px; font-size: 0.8rem; padding: 4px 12px;">
+                            <i class="fas fa-globe me-1"></i>访问官网
+                        </a>
+                        <a href="tel:+8613923658327" class="btn btn-sm btn-outline-light" style="border-radius: 6px; font-size: 0.8rem; padding: 4px 12px; color: var(--text-muted); border-color: var(--border-color);">
+                            <i class="fas fa-phone me-1"></i>联系我们
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-3">
+                    <h6><i class="fas fa-ship me-2"></i>核心物流服务</h6>
+                    <div style="line-height: 2; font-size: 0.85rem;">
+                        <div><i class="fas fa-check-circle me-1" style="color: var(--success); font-size: 0.7rem;"></i>国际海运整箱/拼箱</div>
+                        <div><i class="fas fa-check-circle me-1" style="color: var(--success); font-size: 0.7rem;"></i>中欧班列铁路运输</div>
+                        <div><i class="fas fa-check-circle me-1" style="color: var(--success); font-size: 0.7rem;"></i>中亚卡车公路运输</div>
+                        <div><i class="fas fa-check-circle me-1" style="color: var(--success); font-size: 0.7rem;"></i>国际快递/空派</div>
+                        <div><i class="fas fa-check-circle me-1" style="color: var(--success); font-size: 0.7rem;"></i>海外仓储配送</div>
+                        <div><i class="fas fa-check-circle me-1" style="color: var(--success); font-size: 0.7rem;"></i>国际展会物流</div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-3">
+                    <h6><i class="fas fa-database me-2"></i>数据来源</h6>
+                    <div style="line-height: 2; font-size: 0.85rem;">
+                        <div><i class="fas fa-globe me-1" style="color: var(--accent-blue);"></i>WCO 世界海关组织</div>
+                        <div><i class="fas fa-landmark me-1" style="color: var(--accent-blue);"></i>中国海关总署 (GACC)</div>
+                        <div><i class="fas fa-building me-1" style="color: var(--accent-blue);"></i>商务部 (MOFCOM)</div>
+                    </div>
+                    <div style="margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <div style="font-size: 0.8rem; line-height: 2;">
+                            <div><a href="https://www.wcoomd.org" target="_blank" style="color: rgba(255,255,255,0.7); text-decoration: none;">WCO官网</a></div>
+                            <div><a href="http://www.customs.gov.cn" target="_blank" style="color: rgba(255,255,255,0.7); text-decoration: none;">海关总署</a></div>
+                            <div><a href="http://www.mofcom.gov.cn" target="_blank" style="color: rgba(255,255,255,0.7); text-decoration: none;">商务部</a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-divider"></div>
+            <div class="text-center footer-bottom">
+                <p class="mb-0" style="font-size: 0.8rem;">
+                    &copy; 2008-2025 深圳快滴收科技有限公司 版权所有 | 
+                    <a href="https://kindles-logistics.com/" target="_blank" style="color: var(--accent-blue); text-decoration: none;">kindles-logistics.com</a> | 
+                    HS编码查询结果仅供参考，不作为正式申报依据
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+
+<!-- ========== 全局悬浮AI助手 ========== -->
+<div id="floatingAiBtn" onclick="toggleFloatingChat()" style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #1a5276, #2980b9); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 20px rgba(26,82,118,0.4); z-index: 9999; transition: all 0.3s; font-size: 1.5rem;" onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 6px 25px rgba(26,82,118,0.5)'" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 20px rgba(26,82,118,0.4)'">
+    <i class="fas fa-headset"></i>
+</div>
+
+<div id="floatingChatWindow" style="display: none; position: fixed; bottom: 100px; right: 30px; width: 380px; max-height: 520px; background: #fff; border-radius: 16px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); z-index: 10000; flex-direction: column; overflow: hidden; border: 1px solid #dee2e6;">
+    <!-- 聊天头部 -->
+    <div style="background: linear-gradient(135deg, #1a5276, #2980b9); color: #fff; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div>
+                <div style="font-weight: 700; font-size: 0.95rem;">快滴收国际物流助手</div>
+                <div style="font-size: 0.72rem; opacity: 0.8;">AI智能客服 · 在线</div>
+            </div>
+        </div>
+        <button onclick="toggleFloatingChat()" style="background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; padding: 4px; opacity: 0.8;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <!-- 聊天消息区 -->
+    <div id="floatingChatMessages" style="flex: 1; overflow-y: auto; padding: 16px; max-height: 340px; min-height: 200px; background: #f8f9fa;">
+        <div style="text-align: center; margin-bottom: 16px;">
+            <div style="display: inline-block; background: #fff; border-radius: 12px; padding: 12px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); max-width: 90%;">
+                <div style="font-size: 0.88rem; color: #333; line-height: 1.6;">
+                    👋 您好！我是<strong>快滴收国际物流助手</strong><br>
+                    可以帮您查询HS编码、了解两用物项规定、物流方案等。<br>
+                    <span style="font-size: 0.78rem; color: var(--accent-blue);">📦 深圳快滴收科技 · 16年国际物流经验 · 覆盖200+国家</span><br>
+                    <span style="font-size: 0.8rem; color: #999;">请问有什么可以帮您？</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 快捷问题（每次打开随机更新） -->
+    <div id="floatingQuickBtns" style="padding: 8px 16px; background: #fff; border-top: 1px solid #eee; display: flex; gap: 6px; flex-wrap: wrap;">
+    </div>
+    <!-- 输入区 -->
+    <div style="padding: 12px 16px; background: #fff; border-top: 1px solid #eee; display: flex; gap: 8px; align-items: center;">
+        <input type="text" id="floatingChatInput" placeholder="输入您的问题..." style="flex: 1; border: 1px solid #dee2e6; border-radius: 20px; padding: 8px 16px; font-size: 0.88rem; outline: none;" onkeypress="if(event.key==='Enter')sendFloatingMsg()">
+        <button onclick="sendFloatingMsg()" style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #1a5276, #2980b9); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <i class="fas fa-paper-plane" style="font-size: 0.85rem;"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+// 悬浮AI助手
+let floatingChatOpen = false;
+let floatingChatHistory = [];
+
+// 快捷问题库（每次打开随机抽取3个）
+const quickQuestions = [
+    { label: '锂电池分类', msg: '锂电池怎么分类？' },
+    { label: '两用物项', msg: '什么是两用物项？' },
+    { label: '出口俄罗斯', msg: '出口俄罗斯需要什么手续？' },
+    { label: 'HS编码查询', msg: '如何查询产品的HS编码？' },
+    { label: '出口欧盟', msg: '出口欧盟需要什么认证？' },
+    { label: '中欧班列', msg: '中欧班列时效和费用？' },
+    { label: '报关流程', msg: '出口报关需要哪些文件？' },
+    { label: '海外仓储', msg: '海外仓储服务介绍' },
+    { label: '出口退税', msg: '出口退税率怎么查？' },
+    { label: '国际海运', msg: '国际海运费用怎么算？' },
+    { label: '展会物流', msg: '展会物流怎么安排？' },
+    { label: '中亚卡车', msg: '中亚卡车运输时效？' },
+];
+
+function refreshQuickButtons() {
+    const container = document.getElementById('floatingQuickBtns');
+    if (!container) return;
+    const shuffled = quickQuestions.sort(() => Math.random() - 0.5);
+    const selected = shuffled.slice(0, 3);
+    container.innerHTML = selected.map(q =>
+        '<button class="btn btn-sm" style="font-size: 0.72rem; border-radius: 20px; padding: 3px 10px; background: #e8f4fd; color: #1a5276; border: 1px solid #b3d7ee;" onclick="sendFloatingMsg(\'' + q.msg + '\')">' + q.label + '</button>'
+    ).join('');
+}
+
+function toggleFloatingChat() {
+    const chatWindow = document.getElementById('floatingChatWindow');
+    const chatBtn = document.getElementById('floatingAiBtn');
+    floatingChatOpen = !floatingChatOpen;
+    if (floatingChatOpen) {
+        chatWindow.style.display = 'flex';
+        chatBtn.innerHTML = '<i class="fas fa-times"></i>';
+        chatBtn.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+        document.getElementById('floatingChatInput').focus();
+        refreshQuickButtons();
+    } else {
+        chatWindow.style.display = 'none';
+        chatBtn.innerHTML = '<i class="fas fa-headset"></i>';
+        chatBtn.style.background = 'linear-gradient(135deg, #1a5276, #2980b9)';
+    }
+}
+
+function sendFloatingMsg(presetMsg) {
+    const input = document.getElementById('floatingChatInput');
+    const msg = presetMsg || input.value.trim();
+    if (!msg) return;
+    input.value = '';
+    
+    const msgArea = document.getElementById('floatingChatMessages');
+    
+    // 用户消息
+    msgArea.innerHTML += '<div style="display: flex; justify-content: flex-end; margin-bottom: 12px;"><div style="background: linear-gradient(135deg, #1a5276, #2980b9); color: #fff; border-radius: 12px 12px 2px 12px; padding: 10px 14px; max-width: 80%; font-size: 0.88rem; line-height: 1.5;">' + msg.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div></div>';
+    
+    // 加载中
+    const loadingId = 'fl_loading_' + Date.now();
+    msgArea.innerHTML += '<div id="' + loadingId + '" style="display: flex; justify-content: flex-start; margin-bottom: 12px;"><div style="background: #fff; border-radius: 12px 12px 12px 2px; padding: 10px 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);"><div style="display: flex; gap: 4px; align-items: center;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #2980b9; animation: floatDot 1.4s infinite ease-in-out both;"></span><span style="width: 6px; height: 6px; border-radius: 50%; background: #2980b9; animation: floatDot 1.4s infinite ease-in-out 0.2s both;"></span><span style="width: 6px; height: 6px; border-radius: 50%; background: #2980b9; animation: floatDot 1.4s infinite ease-in-out 0.4s both;"></span></div></div></div>';
+    msgArea.scrollTop = msgArea.scrollHeight;
+    
+    floatingChatHistory.push({"role": "user", "content": msg});
+    
+    fetch('/api/ai-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, history: floatingChatHistory.slice(-10) })
+    })
+    .then(r => {
+        if (!r.ok) {
+            if (r.status === 401 || r.status === 302) throw new Error('请先登录后使用');
+            throw new Error('服务器返回错误(' + r.status + ')');
+        }
+        return r.json();
+    })
+    .then(data => {
+        const loadEl = document.getElementById(loadingId);
+        if (loadEl) loadEl.remove();
+
+        let reply = data.reply || data.message || '抱歉，我暂时无法回答。';
+        if (data.success === false) reply = data.error || '服务暂时不可用，请稍后重试。';
+
+        floatingChatHistory.push({"role": "assistant", "content": reply});
+
+        // 简单markdown渲染
+        reply = reply.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+
+        msgArea.innerHTML += '<div style="display: flex; justify-content: flex-start; margin-bottom: 12px;"><div style="background: #fff; border-radius: 12px 12px 12px 2px; padding: 10px 14px; max-width: 80%; box-shadow: 0 2px 8px rgba(0,0,0,0.06); font-size: 0.88rem; line-height: 1.6; color: #333;">' + reply + '</div></div>';
+        msgArea.scrollTop = msgArea.scrollHeight;
+    })
+    .catch(err => {
+        const loadEl = document.getElementById(loadingId);
+        if (loadEl) loadEl.remove();
+        msgArea.innerHTML += '<div style="display: flex; justify-content: flex-start; margin-bottom: 12px;"><div style="background: #fff5f5; border-radius: 12px 12px 12px 2px; padding: 10px 14px; font-size: 0.88rem; color: #e74c3c;">网络错误：' + err.message + '</div></div>';
+        msgArea.scrollTop = msgArea.scrollHeight;
+    });
+}
+
+// 打字动画CSS
+const floatStyle = document.createElement('style');
+floatStyle.textContent = '@keyframes floatDot { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }';
+document.head.appendChild(floatStyle);
+</script>
+</body>
+</html>

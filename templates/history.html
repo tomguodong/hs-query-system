@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}查询历史 - 海关编码智能查询系统{% endblock %}
+
+{% block content %}
+<div class="page-title"><i class="fas fa-history me-2" style="color: var(--accent-blue);"></i>查询历史</div>
+<div class="page-subtitle">查看您的所有查询记录与AI分类结果</div>
+
+<!-- 筛选栏 -->
+<div class="card card-custom mb-4">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-3 col-md-4">
+                <label class="form-label" style="font-weight: 600;">
+                    <i class="fas fa-filter me-1"></i>查询类型
+                </label>
+                <select id="typeFilter" class="form-select" style="border-radius: 8px; padding: 10px;" onchange="loadHistory()">
+                    <option value="">全部类型</option>
+                    <option value="keyword">关键词搜索</option>
+                    <option value="ai">AI智能分类</option>
+                    <option value="dual_use">两用物项检测</option>
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-4">
+                <label class="form-label" style="font-weight: 600;">
+                    <i class="fas fa-calendar me-1"></i>日期范围
+                </label>
+                <input type="date" id="dateFilter" class="form-control" style="border-radius: 8px; padding: 10px;" onchange="loadHistory()">
+            </div>
+            <div class="col-lg-4 col-md-4">
+                <label class="form-label" style="font-weight: 600;">
+                    <i class="fas fa-search me-1"></i>搜索历史
+                </label>
+                <input type="text" id="historyKeyword" class="form-control search-input-custom"
+                       placeholder="搜索查询内容..." onkeypress="if(event.key==='Enter')loadHistory()">
+            </div>
+            <div class="col-lg-2 col-md-12">
+                <button class="btn btn-primary-custom w-100" onclick="loadHistory()" style="padding: 10px;">
+                    <i class="fas fa-filter me-1"></i>筛选
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 历史记录表格 -->
+<div class="card card-custom">
+    <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="table table-custom table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 160px;">查询时间</th>
+                        <th>查询内容</th>
+                        <th style="width: 100px;">类型</th>
+                        <th style="width: 120px;">匹配编码</th>
+                        <th style="width: 120px;">AI建议</th>
+                        <th style="width: 100px;">两用物项</th>
+                        <th style="width: 100px;">响应时间</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                    <tr>
+                        <td colspan="7" class="text-center py-5" style="color: var(--text-muted);">
+                            <i class="fas fa-spinner fa-spin me-2"></i>正在加载...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 分页 -->
+<div class="d-flex justify-content-between align-items-center mt-4">
+    <span style="font-size: 0.88rem; color: var(--text-muted);" id="historyPageInfo">共 0 条记录</span>
+    <nav>
+        <ul class="pagination pagination-custom mb-0" id="historyPagination">
+        </ul>
+    </nav>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let historyPage = 1;
+const historyPageSize = 20;
+
+function loadHistory(page) {
+    if (page !== undefined) historyPage = page;
+
+    const type = document.getElementById('typeFilter').value;
+    const date = document.getElementById('dateFilter').value;
+    const keyword = document.getElementById('historyKeyword').value.trim();
+
+    const params = new URLSearchParams({
+        page: historyPage,
+        per_page: historyPageSize,
+        type: type,
+        date: date,
+        keyword: keyword
+    });
+
+    fetch('/api/history?' + params.toString())
+        .then(response => response.json())
+        .then(data => {
+            renderHistoryTable(data);
+            renderHistoryPagination(data);
+        })
+        .catch(err => {
+            document.getElementById('historyTableBody').innerHTML = `
+                <tr><td colspan="7" class="text-center py-5" style="color: var(--danger);">
+                    <i class="fas fa-times-circle me-2"></i>加载失败：${err.message}
+                </td></tr>`;
+        });
+}
+
+function renderHistoryTable(data) {
+    const tbody = document.getElementById('historyTableBody');
+    const items = data.items || data.results || data.history || [];
+
+    if (items.length === 0) {
+        tbody.innerHTML = `
+            <tr><td colspan="7" class="text-center py-5" style="color: var(--text-muted);">
+                <i class="fas fa-inbox" style="font-size: 2rem; opacity: 0.3; margin-bottom: 0.5rem; display: block;"></i>
+                暂无查询历史记录
+            </td></tr>`;
+        return;
+    }
+
+    const typeMap = {
+        keyword: { text: '关键词搜索', class: 'badge-info' },
+        ai: { text: 'AI分类', class: 'badge-success' },
+        dual_use: { text: '两用物项', class: 'badge-warning' }
+    };
+
+    let html = '';
+    items.forEach(item => {
+        const type = typeMap[item.query_type] || typeMap[item.type] || { text: item.query_type || '--', class: 'bg-secondary' };
+        const dualUse = item.dual_use_flag || item.dual_use
+            ? '<span class="badge badge-danger">是</span>'
+            : '<span class="badge bg-secondary">否</span>';
+        const responseTime = item.response_time ? (item.response_time + 'ms') : '--';
+
+        html += `<tr>
+            <td style="font-size: 0.85rem; color: var(--text-muted);">${item.created_at || item.timestamp || '--'}</td>
+            <td>
+                <div style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${item.query_content || item.keyword || ''}">
+                    ${item.query_content || item.keyword || '--'}
+                </div>
+            </td>
+            <td><span class="badge ${type.class}">${type.text}</span></td>
+            <td><code style="font-size: 0.85rem; color: var(--accent-blue);">${item.matched_code || item.hs_code || '--'}</code></td>
+            <td style="font-size: 0.85rem;">${item.ai_suggestion || '--'}</td>
+            <td>${dualUse}</td>
+            <td style="font-size: 0.85rem; color: var(--text-muted);">${responseTime}</td>
+        </tr>`;
+    });
+
+    tbody.innerHTML = html;
+}
+
+function renderHistoryPagination(data) {
+    const total = data.total || 0;
+    const totalPages = Math.ceil(total / historyPageSize);
+    document.getElementById('historyPageInfo').textContent = `共 ${total} 条记录，第 ${historyPage}/${totalPages || 1} 页`;
+
+    const pagList = document.getElementById('historyPagination');
+    let html = '';
+
+    html += `<li class="page-item ${historyPage <= 1 ? 'disabled' : ''}">
+        <a class="page-link" href="javascript:void(0)" onclick="loadHistory(${historyPage - 1})">&laquo;</a>
+    </li>`;
+
+    const start = Math.max(1, historyPage - 2);
+    const end = Math.min(totalPages, historyPage + 2);
+    for (let i = start; i <= end; i++) {
+        html += `<li class="page-item ${i === historyPage ? 'active' : ''}">
+            <a class="page-link" href="javascript:void(0)" onclick="loadHistory(${i})">${i}</a>
+        </li>`;
+    }
+
+    html += `<li class="page-item ${historyPage >= totalPages ? 'disabled' : ''}">
+        <a class="page-link" href="javascript:void(0)" onclick="loadHistory(${historyPage + 1})">&raquo;</a>
+    </li>`;
+
+    pagList.innerHTML = html;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadHistory(1);
+});
+</script>
+{% endblock %}

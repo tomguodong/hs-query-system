@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+
+{% block title %}HS查询资源 - 快滴收 · HS智能查询系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    .resource-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .resource-list li {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: background-color 0.2s;
+    }
+
+    .resource-list li:last-child {
+        border-bottom: none;
+    }
+
+    .resource-list li:hover {
+        background-color: var(--bg-light);
+    }
+
+    .resource-name {
+        font-weight: 600;
+        font-size: 1rem;
+        color: var(--text-dark);
+        margin-bottom: 0.3rem;
+    }
+
+    .resource-name a {
+        color: var(--accent-blue);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .resource-name a:hover {
+        color: var(--highlight-blue);
+        text-decoration: underline;
+    }
+
+    .resource-url {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        word-break: break-all;
+        margin-bottom: 0.25rem;
+    }
+
+    .resource-desc {
+        font-size: 0.88rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+
+    .section-icon {
+        font-size: 1.1rem;
+        margin-right: 0.5rem;
+    }
+
+    .table-custom td {
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .table-custom td:first-child {
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .note-item {
+        padding: 0.8rem 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+        color: #0c5460;
+        border-left: 4px solid var(--info);
+        font-size: 0.92rem;
+        line-height: 1.6;
+    }
+
+    .note-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .note-item strong {
+        color: #0a4d5c;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <i class="fas fa-link me-2"></i>官方HS编码查询资源
+</div>
+<p class="page-subtitle">汇集中国及国际权威HS编码查询网址、API接口信息，助力高效归类与合规申报</p>
+
+<!-- 区块1：中国官方HS编码查询网址 -->
+<div class="card-custom mb-4">
+    <div class="card-header">
+        <span class="section-icon">&#127464;&#127475;</span>中国官方HS编码查询网址
+    </div>
+    <div class="card-body">
+        <ul class="resource-list">
+            <li>
+                <div class="resource-name">
+                    <a href="https://www.customs.gov.cn/customs/302249/index.html" target="_blank">
+                        <i class="fas fa-external-link-alt me-1" style="font-size: 0.8rem;"></i>中国海关总署商品归类信息查询
+                    </a>
+                </div>
+                <div class="resource-url">https://www.customs.gov.cn/customs/302249/index.html</div>
+                <div class="resource-desc">查询最新HS编码、归类规则、申报要素、监管条件、关税税率</div>
+            </li>
+            <li>
+                <div class="resource-name">
+                    <a href="https://online.customs.gov.cn/" target="_blank">
+                        <i class="fas fa-external-link-alt me-1" style="font-size: 0.8rem;"></i>海关总署"互联网+海关"平台
+                    </a>
+                </div>
+                <div class="resource-url">https://online.customs.gov.cn/</div>
+                <div class="resource-desc">税费业务 &rarr; 商品归类查询</div>
+            </li>
+            <li>
+                <div class="resource-name">
+                    <a href="https://www.singlewindow.cn/" target="_blank">
+                        <i class="fas fa-external-link-alt me-1" style="font-size: 0.8rem;"></i>中国国际贸易单一窗口
+                    </a>
+                </div>
+                <div class="resource-url">https://www.singlewindow.cn/</div>
+                <div class="resource-desc">报关必备，集成HS编码查询、归类预裁定</div>
+            </li>
+            <li>
+                <div class="resource-name">
+                    <a href="https://shenzhen.customs.gov.cn/" target="_blank">
+                        <i class="fas fa-external-link-alt me-1" style="font-size: 0.8rem;"></i>深圳海关归类查询
+                    </a>
+                </div>
+                <div class="resource-url">https://shenzhen.customs.gov.cn/</div>
+                <div class="resource-desc">适合华南企业</div>
+            </li>
+            <li>
+                <div class="resource-name">
+                    <a href="https://www.chinacustomsbroker.org.cn/" target="_blank">
+                        <i class="fas fa-external-link-alt me-1" style="font-size: 0.8rem;"></i>中国报关协会归类服务平台
+                    </a>
+                </div>
+                <div class="resource-url">https://www.chinacustomsbroker.org.cn/</div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- 区块2：国际权威HS编码查询网址 -->
+<div class="card-custom mb-4">
+    <div class="card-header">
+        <span class="section-icon">&#127758;</span>国际权威HS编码查询网址
+    </div>
+    <div class="card-body">
+        <ul class="resource-list">
+            <li>
+                <div class="resource-name">
+                    <a href="https://www.wcoomd.org/en/topics/nomenclature/hs-database.aspx" target="_blank">
+                        <i class="fas fa-external-link-alt me-1" style="font-size: 0.8rem;"></i>WCO HS编码数据库
+                    </a>
+                </div>
+                <div class="resource-url">https://www.wcoomd.org/en/topics/nomenclature/hs-database.aspx</div>
+                <div class="resource-desc">全球HS编码母库，6位基础编码权威来源</div>
+            </li>
+            <li>
+                <div class="resource-name">
+                    <a href="https://www.wcoomd.org/en/topics/nomenclature/hs-online-database.aspx" target="_blank">
+                        <i class="fas fa-external-link-alt me-1" style="font-size: 0.8rem;"></i>WCO HS编码在线查询
+                    </a>
+                </div>
+                <div class="resource-url">https://www.wcoomd.org/en/topics/nomenclature/hs-online-database.aspx</div>
+            </li>
+            <li>
+                <div class="resource-name">
+                    <a href="https://ec.europa.eu/taxation_customs/dds2/taric/taric_consultation.jsp" target="_blank">
+                        <i class="fas fa-external-link-alt me-1" style="font-size: 0.8rem;"></i>欧盟关税数据库 TARIC
+                    </a>
+                </div>
+                <div class="resource-url">https://ec.europa.eu/taxation_customs/dds2/taric/taric_consultation.jsp</div>
+                <div class="resource-desc">查欧盟HS编码、关税、增值税、反倾销税</div>
+            </li>
+            <li>
+                <div class="resource-name">
+                    <a href="https://www.douane.gouv.fr/fr/outils-et-services/recherche-de-codes-tarifaires" target="_blank">
+                        <i class="fas fa-external-link-alt me-1" style="font-size: 0.8rem;"></i>法国海关 DGDDI
+                    </a>
+                </div>
+                <div class="resource-url">https://www.douane.gouv.fr/fr/outils-et-services/recherche-de-codes-tarifaires</div>
+                <div class="resource-desc">法国本地HS编码、清关规则</div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- 区块3：可对接API接口平台 -->
+<div class="card-custom mb-4">
+    <div class="card-header">
+        <span class="section-icon">&#128268;</span>可对接API接口平台
+    </div>
+    <div class="card-body">
+        <ul class="resource-list">
+            <li>
+                <div class="resource-name">
+                    <a href="https://www.singlewindow.cn/doc/api/" target="_blank">
+                        <i class="fas fa-external-link-alt me-1" style="font-size: 0.8rem;"></i>中国国际贸易单一窗口API
+                    </a>
+                </div>
+                <div class="resource-url">https://www.singlewindow.cn/doc/api/</div>
+                <div class="resource-desc">官方报关级接口</div>
+            </li>
+            <li>
+                <div class="resource-name">
+                    <i class="fas fa-lock me-1" style="font-size: 0.8rem; color: var(--text-muted);"></i>海关总署"金关工程"API
+                </div>
+                <div class="resource-desc">政府级数据接口，适合大型企业</div>
+            </li>
+            <li>
+                <div class="resource-name">
+                    <a href="https://www.guanwutong.com/api" target="_blank">
+                        <i class="fas fa-external-link-alt me-1" style="font-size: 0.8rem;"></i>关务通API
+                    </a>
+                </div>
+                <div class="resource-url">https://www.guanwutong.com/api</div>
+                <div class="resource-desc">HS编码查询、归类建议、申报要素</div>
+            </li>
+            <li>
+                <div class="resource-name">
+                    <a href="https://www.yunguantong.com/api" target="_blank">
+                        <i class="fas fa-external-link-alt me-1" style="font-size: 0.8rem;"></i>云关通API
+                    </a>
+                </div>
+                <div class="resource-url">https://www.yunguantong.com/api</div>
+                <div class="resource-desc">HS编码智能匹配、批量查询</div>
+            </li>
+            <li>
+                <div class="resource-name">
+                    <a href="https://www.kuajingyan.com/api" target="_blank">
+                        <i class="fas fa-external-link-alt me-1" style="font-size: 0.8rem;"></i>跨境眼API
+                    </a>
+                </div>
+                <div class="resource-url">https://www.kuajingyan.com/api</div>
+                <div class="resource-desc">多国HS编码、关税、清关规则</div>
+            </li>
+            <li>
+                <div class="resource-name">
+                    <a href="https://ec.europa.eu/taxation_customs/dds2/taric/api" target="_blank">
+                        <i class="fas fa-external-link-alt me-1" style="font-size: 0.8rem;"></i>欧盟TARIC API
+                    </a>
+                </div>
+                <div class="resource-url">https://ec.europa.eu/taxation_customs/dds2/taric/api</div>
+                <div class="resource-desc">欧盟官方开放接口</div>
+            </li>
+            <li>
+                <div class="resource-name">
+                    <a href="https://www.wcoomd.org/en/topics/nomenclature/hs-api.aspx" target="_blank">
+                        <i class="fas fa-external-link-alt me-1" style="font-size: 0.8rem;"></i>WCO HS API
+                    </a>
+                </div>
+                <div class="resource-url">https://www.wcoomd.org/en/topics/nomenclature/hs-api.aspx</div>
+                <div class="resource-desc">全球6位HS编码基础数据</div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- 区块4：API对接选型建议 -->
+<div class="card-custom mb-4">
+    <div class="card-header">
+        <i class="fas fa-lightbulb me-2"></i>API对接选型建议
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">场景</th>
+                        <th style="width: 40%;">前端查询推荐</th>
+                        <th style="width: 40%;">API集成推荐</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>出口中国 &rarr; 法国</td>
+                        <td>单一窗口 + 欧盟TARIC</td>
+                        <td>关务通/云关通 + TARIC API</td>
+                    </tr>
+                    <tr>
+                        <td>纯国内物流/报关</td>
+                        <td>单一窗口API</td>
+                        <td>关务通API</td>
+                    </tr>
+                    <tr>
+                        <td>全球多国家物流</td>
+                        <td>跨境眼 + WCO HS</td>
+                        <td>跨境眼API + WCO HS API</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 区块5：使用注意事项 -->
+<div class="card-custom mb-4">
+    <div class="card-header">
+        <i class="fas fa-info-circle me-2"></i>使用注意事项
+    </div>
+    <div class="card-body">
+        <div class="note-item">
+            <strong><i class="fas fa-clock me-1"></i>HS编码时效性：</strong>
+            中国海关每年调整部分编码，优先使用海关总署/单一窗口最新数据。
+        </div>
+        <div class="note-item">
+            <strong><i class="fas fa-shield-halved me-1"></i>API合规性：</strong>
+            第三方API需确保数据来源为官方。
+        </div>
+        <div class="note-item">
+            <strong><i class="fas fa-flag me-1"></i>出口法国特殊要求：</strong>
+            需同时匹配中国HS编码（前8位）与欧盟TARIC编码（10位）。
+        </div>
+    </div>
+</div>
+
+{% endblock %}

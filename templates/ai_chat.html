@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% block title %}AI智能助手 - 快滴收 · HS智能查询系统{% endblock %}
+{% block content %}
+<div class="container" style="max-width: 900px; padding-top: 1.5rem; padding-bottom: 2rem;">
+    <!-- 页面标题 -->
+    <div class="text-center mb-4">
+        <h4 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.3rem;">
+            <i class="fas fa-robot me-2" style="color: var(--accent-blue);"></i>快滴收国际物流助手
+        </h4>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">基于AI大模型，为您提供HS编码查询、物流咨询、报关指导等智能服务</p>
+    </div>
+
+    <!-- 对话区域 -->
+    <div id="chatContainer" style="height: 520px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 12px; padding: 1.2rem; background: var(--bg-light); margin-bottom: 1rem;">
+        <!-- 欢迎消息 -->
+        <div class="d-flex align-items-start mb-3">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--accent-blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 10px;">
+                <i class="fas fa-robot" style="color: #fff; font-size: 0.9rem;"></i>
+            </div>
+            <div style="background: #fff; border-radius: 0 12px 12px 12px; padding: 12px 16px; max-width: 75%; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                <div style="font-size: 0.88rem; line-height: 1.6;">
+                    您好！我是<strong>快滴收国际物流助手</strong>，可以帮您：<br><br>
+                    <strong>查询HS编码</strong> - 输入商品名称，我帮您找到对应的海关编码<br>
+                    <strong>物流咨询</strong> - 国际海运、空运、中欧班列等物流方案<br>
+                    <strong>报关指导</strong> - 进出口报关流程和注意事项<br>
+                    <strong>合规提醒</strong> - 两用物项管制清单查询<br>
+                    <strong>公司服务</strong> - 深圳快滴收科技物流服务介绍<br><br>
+                    请直接输入您的问题！
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 快捷问题 -->
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        <button class="btn btn-sm" style="background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 20px; font-size: 0.8rem; color: var(--text-dark);" onclick="sendQuickMsg('查询手机的海关编码和税率')">查询手机HS编码</button>
+        <button class="btn btn-sm" style="background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 20px; font-size: 0.8rem; color: var(--text-dark);" onclick="sendQuickMsg('锂电池出口需要注意什么？')">锂电池出口注意</button>
+        <button class="btn btn-sm" style="background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 20px; font-size: 0.8rem; color: var(--text-dark);" onclick="sendQuickMsg('介绍一下快滴收的物流服务')">公司服务介绍</button>
+        <button class="btn btn-sm" style="background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 20px; font-size: 0.8rem; color: var(--text-dark);" onclick="sendQuickMsg('什么是两用物项？如何判断？')">两用物项说明</button>
+        <button class="btn btn-sm" style="background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 20px; font-size: 0.8rem; color: var(--text-dark);" onclick="sendQuickMsg('货物出口俄罗斯的报关流程')">俄罗斯报关流程</button>
+    </div>
+
+    <!-- 输入区域 -->
+    <div class="input-group" style="border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
+        <input type="text" id="chatInput" class="form-control" style="border: none; padding: 14px 18px; font-size: 0.95rem;" placeholder="输入您的问题..." onkeydown="if(event.key==='Enter')sendMessage()">
+        <button class="btn btn-primary-custom" style="padding: 14px 24px; border: none;" onclick="sendMessage()" id="sendBtn">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+    <div class="text-end mt-2" style="font-size: 0.75rem; color: var(--text-muted);">
+        <span id="modelInfo">当前模型：加载中...</span>
+        <span class="ms-3"><button class="btn btn-sm p-0" style="font-size: 0.75rem; color: var(--danger);" onclick="clearChat()"><i class="fas fa-trash me-1"></i>清空对话</button></span>
+    </div>
+</div>
+
+<style>
+/* 对话气泡动画 */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.chat-msg { animation: fadeInUp 0.3s ease; }
+/* Markdown简单渲染 */
+.chat-content p { margin-bottom: 0.5rem; }
+.chat-content strong { color: var(--primary-dark); }
+.chat-content ul, .chat-content ol { padding-left: 1.5rem; margin-bottom: 0.5rem; }
+.chat-content code { background: var(--bg-light); padding: 2px 6px; border-radius: 4px; font-size: 0.85em; }
+.chat-content pre { background: #1e1e2e; color: #cdd6f4; padding: 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
+.chat-content pre code { background: none; padding: 0; color: inherit; }
+.chat-content h1, .chat-content h2, .chat-content h3 { font-weight: 700; margin-top: 0.8rem; margin-bottom: 0.4rem; color: var(--primary-dark); }
+.chat-content h1 { font-size: 1.1rem; }
+.chat-content h2 { font-size: 1rem; }
+.chat-content h3 { font-size: 0.95rem; }
+.chat-content blockquote { border-left: 3px solid var(--accent-blue); padding-left: 12px; margin: 8px 0; color: var(--text-muted); }
+.chat-content table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 0.85rem; }
+.chat-content th, .chat-content td { border: 1px solid var(--border-color); padding: 6px 10px; text-align: left; }
+.chat-content th { background: var(--bg-light); font-weight: 600; }
+/* 打字指示器 */
+.typing-indicator span { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); margin: 0 2px; animation: typing 1.4s infinite; }
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+</style>
+
+<script>
+let chatHistory = [];
+let isSending = false;
+
+// 加载当前模型信息
+fetch('/api/model-status').then(r => r.json()).then(data => {
+    if (data.success && data.current_model) {
+        document.getElementById('modelInfo').textContent = '当前模型：' + data.current_model.name;
+    }
+}).catch(() => {});
+
+function sendQuickMsg(msg) {
+    document.getElementById('chatInput').value = msg;
+    sendMessage();
+}
+
+function clearChat() {
+    chatHistory = [];
+    const container = document.getElementById('chatContainer');
+    container.innerHTML = `
+        <div class="d-flex align-items-start mb-3">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--accent-blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 10px;">
+                <i class="fas fa-robot" style="color: #fff; font-size: 0.9rem;"></i>
+            </div>
+            <div style="background: #fff; border-radius: 0 12px 12px 12px; padding: 12px 16px; max-width: 75%;">
+                <div style="font-size: 0.88rem;">对话已清空，请输入新的问题。</div>
+            </div>
+        </div>`;
+}
+
+function addMessage(role, content) {
+    const container = document.getElementById('chatContainer');
+    const isUser = role === 'user';
+
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'd-flex align-items-start mb-3 chat-msg ' + (isUser ? 'justify-content-end' : '');
+
+    if (isUser) {
+        msgDiv.innerHTML = `
+            <div style="background: var(--accent-blue); color: #fff; border-radius: 12px 0 12px 12px; padding: 10px 16px; max-width: 75%;">
+                <div style="font-size: 0.88rem; white-space: pre-wrap;">${escapeHtml(content)}</div>
+            </div>
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--primary-dark); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 10px;">
+                <i class="fas fa-user" style="color: #fff; font-size: 0.85rem;"></i>
+            </div>`;
+    } else {
+        msgDiv.innerHTML = `
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--accent-blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 10px;">
+                <i class="fas fa-robot" style="color: #fff; font-size: 0.9rem;"></i>
+            </div>
+            <div style="background: #fff; border-radius: 0 12px 12px 12px; padding: 12px 16px; max-width: 75%; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                <div class="chat-content" style="font-size: 0.88rem; line-height: 1.7;">${renderMarkdown(content)}</div>
+            </div>`;
+    }
+
+    container.appendChild(msgDiv);
+    container.scrollTop = container.scrollHeight;
+}
+
+function addTypingIndicator() {
+    const container = document.getElementById('chatContainer');
+    const div = document.createElement('div');
+    div.className = 'd-flex align-items-start mb-3 chat-msg';
+    div.id = 'typingIndicator';
+    div.innerHTML = `
+        <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--accent-blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 10px;">
+            <i class="fas fa-robot" style="color: #fff; font-size: 0.9rem;"></i>
+        </div>
+        <div style="background: #fff; border-radius: 0 12px 12px 12px; padding: 12px 16px;">
+            <div class="typing-indicator"><span></span><span></span><span></span></div>
+        </div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function renderMarkdown(text) {
+    let html = escapeHtml(text);
+    // 代码块
+    html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+    // 行内代码
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    // 粗体
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    // 斜体
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    // 标题
+    html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+    html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+    // 列表
+    html = html.replace(/^[-*] (.+)$/gm, '<li>$1</li>');
+    html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+    // 有序列表
+    html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+    // 引用
+    html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+    // 换行
+    html = html.replace(/\n/g, '<br>');
+    return html;
+}
+
+async function sendMessage() {
+    if (isSending) return;
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    if (!message) return;
+
+    input.value = '';
+    isSending = true;
+    document.getElementById('sendBtn').disabled = true;
+
+    // 添加用户消息
+    addMessage('user', message);
+    chatHistory.push({role: 'user', content: message});
+
+    // 显示打字指示器
+    addTypingIndicator();
+
+    try {
+        const resp = await fetch('/api/ai-chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: message, history: chatHistory})
+        });
+        const data = await resp.json();
+
+        removeTypingIndicator();
+
+        if (data.success) {
+            addMessage('assistant', data.reply);
+            chatHistory.push({role: 'assistant', content: data.reply});
+        } else {
+            addMessage('assistant', 'Error: ' + (data.error || '服务暂时不可用，请稍后重试'));
+        }
+    } catch (err) {
+        removeTypingIndicator();
+        addMessage('assistant', 'Error: 网络错误，请检查连接后重试');
+    }
+
+    isSending = false;
+    document.getElementById('sendBtn').disabled = false;
+}
+</script>
+{% endblock %}

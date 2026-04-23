@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}两用物项清单 - 海关编码智能查询系统{% endblock %}
+
+{% block content %}
+<div class="page-title"><i class="fas fa-exclamation-triangle me-2" style="color: var(--warning);"></i>两用物项管控清单</div>
+<div class="page-subtitle">根据中国出口管制条例，以下物项的出口需取得相应许可证</div>
+
+<!-- 筛选栏 -->
+<div class="card card-custom mb-4">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-3 col-md-4">
+                <label class="form-label" style="font-weight: 600;">
+                    <i class="fas fa-layer-group me-1"></i>物项类别
+                </label>
+                <select id="categoryFilter" class="form-select" style="border-radius: 8px; padding: 10px;" onchange="filterDualUse()">
+                    <option value="">全部类别</option>
+                    <option value="nuclear">核材料、核设备与相关技术</option>
+                    <option value="missile">导弹及相关物项和技术</option>
+                    <option value="chemical">生物和化学武器及相关物项</option>
+                    <option value="electronics">电子和计算机相关</option>
+                    <option value="aerospace">航空航天相关</option>
+                    <option value="marine">船舶和海事相关</option>
+                    <option value="materials">特殊材料和相关设备</option>
+                    <option value="machine">机床和相关设备</option>
+                    <option value="sensor">传感器和激光器</option>
+                    <option value="navigation">导航和航空电子</option>
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-4">
+                <label class="form-label" style="font-weight: 600;">
+                    <i class="fas fa-shield-alt me-1"></i>管控级别
+                </label>
+                <select id="levelFilter" class="form-select" style="border-radius: 8px; padding: 10px;" onchange="filterDualUse()">
+                    <option value="">全部级别</option>
+                    <option value="high">高风险</option>
+                    <option value="medium">中风险</option>
+                    <option value="low">低风险</option>
+                </select>
+            </div>
+            <div class="col-lg-4 col-md-4">
+                <label class="form-label" style="font-weight: 600;">
+                    <i class="fas fa-search me-1"></i>关键词搜索
+                </label>
+                <input type="text" id="dualUseKeyword" class="form-control search-input-custom"
+                       placeholder="输入物项名称、编码或描述..." onkeypress="if(event.key==='Enter')filterDualUse()">
+            </div>
+            <div class="col-lg-2 col-md-12">
+                <button class="btn btn-primary-custom w-100" onclick="filterDualUse()" style="padding: 10px;">
+                    <i class="fas fa-filter me-1"></i>筛选
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 清单列表 -->
+<div id="dualUseList">
+    <div class="table-responsive">
+        <table class="table table-custom table-hover mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">编号</th>
+                    <th style="width: 140px;">类别</th>
+                    <th>物项描述</th>
+                    <th style="width: 120px;">相关HS编码</th>
+                    <th style="width: 100px;">管控级别</th>
+                    <th style="width: 140px;">许可证要求</th>
+                    <th style="width: 60px;">详情</th>
+                </tr>
+            </thead>
+            <tbody id="dualUseTableBody">
+                <tr>
+                    <td colspan="7" class="text-center py-5" style="color: var(--text-muted);">
+                        <i class="fas fa-spinner fa-spin me-2"></i>正在加载数据...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 分页 -->
+<div class="d-flex justify-content-between align-items-center mt-4" id="paginationArea">
+    <span style="font-size: 0.88rem; color: var(--text-muted);" id="pageInfo">共 0 条记录</span>
+    <nav>
+        <ul class="pagination pagination-custom mb-0" id="paginationList">
+        </ul>
+    </nav>
+</div>
+
+<!-- 详情模态框 -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header" style="background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue)); color: #fff; border: none;">
+                <h5 class="modal-title"><i class="fas fa-info-circle me-2"></i>物项详情</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="detailContent" style="padding: 1.5rem;">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentPage = 1;
+const pageSize = 15;
+
+// 筛选
+function filterDualUse(page) {
+    if (page !== undefined) currentPage = page;
+    const category = document.getElementById('categoryFilter').value;
+    const level = document.getElementById('levelFilter').value;
+    const keyword = document.getElementById('dualUseKeyword').value.trim();
+
+    const params = new URLSearchParams({
+        page: currentPage,
+        per_page: pageSize,
+        category: category,
+        level: level,
+        keyword: keyword
+    });
+
+    fetch('/api/dual-use-list?' + params.toString())
+        .then(response => response.json())
+        .then(data => {
+            renderDualUseTable(data);
+            renderPagination(data);
+        })
+        .catch(err => {
+            document.getElementById('dualUseTableBody').innerHTML = `
+                <tr><td colspan="7" class="text-center py-5" style="color: var(--danger);">
+                    <i class="fas fa-times-circle me-2"></i>加载失败：${err.message}
+                </td></tr>`;
+        });
+}
+
+// 渲染表格
+function renderDualUseTable(data) {
+    const tbody = document.getElementById('dualUseTableBody');
+    const items = data.items || data.results || [];
+
+    if (items.length === 0) {
+        tbody.innerHTML = `
+            <tr><td colspan="7" class="text-center py-5" style="color: var(--text-muted);">
+                <i class="fas fa-inbox" style="font-size: 2rem; opacity: 0.3; margin-bottom: 0.5rem; display: block;"></i>
+                暂无匹配的物项数据
+            </td></tr>`;
+        return;
+    }
+
+    const levelMap = { high: { text: '高风险', class: 'badge-danger' }, medium: { text: '中风险', class: 'badge-warning' }, low: { text: '低风险', class: 'badge-info' } };
+    const categoryMap = { nuclear: '核材料', missile: '导弹', chemical: '生化', electronics: '电子', aerospace: '航空航天', marine: '船舶海事', materials: '特殊材料', machine: '机床', sensor: '传感器', navigation: '导航' };
+
+    let html = '';
+    items.forEach((item, idx) => {
+        const level = levelMap[item.control_level] || { text: item.control_level || '--', class: 'bg-secondary' };
+        const catText = categoryMap[item.category] || item.category || '--';
+        const hsCodes = item.related_hs_codes || item.hs_codes || '--';
+        const license = item.license_required || '--';
+
+        html += `<tr>
+            <td><strong>${item.id || item.number || (idx + 1)}</strong></td>
+            <td><span class="badge bg-light text-dark">${catText}</span></td>
+            <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${item.description || ''}">${item.description || '--'}</td>
+            <td><code style="font-size: 0.85rem; color: var(--accent-blue);">${hsCodes}</code></td>
+            <td><span class="badge ${level.class}">${level.text}</span></td>
+            <td style="font-size: 0.85rem;">${license}</td>
+            <td><button class="btn btn-sm btn-outline-custom" onclick="showDetail(${idx})" style="padding: 4px 10px; font-size: 0.8rem;"><i class="fas fa-eye"></i></button></td>
+        </tr>`;
+    });
+
+    tbody.innerHTML = html;
+    // 存储数据供详情使用
+    window._dualUseItems = items;
+}
+
+// 渲染分页
+function renderPagination(data) {
+    const total = data.total || 0;
+    const totalPages = Math.ceil(total / pageSize);
+    document.getElementById('pageInfo').textContent = `共 ${total} 条记录，第 ${currentPage}/${totalPages || 1} 页`;
+
+    const pagList = document.getElementById('paginationList');
+    let html = '';
+
+    html += `<li class="page-item ${currentPage <= 1 ? 'disabled' : ''}">
+        <a class="page-link" href="javascript:void(0)" onclick="filterDualUse(${currentPage - 1})">&laquo;</a>
+    </li>`;
+
+    const start = Math.max(1, currentPage - 2);
+    const end = Math.min(totalPages, currentPage + 2);
+    for (let i = start; i <= end; i++) {
+        html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+            <a class="page-link" href="javascript:void(0)" onclick="filterDualUse(${i})">${i}</a>
+        </li>`;
+    }
+
+    html += `<li class="page-item ${currentPage >= totalPages ? 'disabled' : ''}">
+        <a class="page-link" href="javascript:void(0)" onclick="filterDualUse(${currentPage + 1})">&raquo;</a>
+    </li>`;
+
+    pagList.innerHTML = html;
+}
+
+// 显示详情
+function showDetail(idx) {
+    const items = window._dualUseItems || [];
+    const item = items[idx];
+    if (!item) return;
+
+    const levelMap = { high: '高风险', medium: '中风险', low: '低风险' };
+    const levelColor = { high: 'var(--danger)', medium: 'var(--warning)', low: 'var(--success)' };
+
+    document.getElementById('detailContent').innerHTML = `
+        <div class="mb-3">
+            <h5 style="font-weight: 700; color: var(--primary-dark);">${item.description || '--'}</h5>
+        </div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="p-3" style="background: var(--bg-light); border-radius: 8px;">
+                    <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.3rem;">编号</div>
+                    <div style="font-weight: 600;">${item.id || item.number || '--'}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3" style="background: var(--bg-light); border-radius: 8px;">
+                    <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.3rem;">管控级别</div>
+                    <div style="font-weight: 700; color: ${levelColor[item.control_level] || 'var(--text-dark)'};">
+                        ${levelMap[item.control_level] || item.control_level || '--'}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3" style="background: var(--bg-light); border-radius: 8px;">
+                    <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.3rem;">相关HS编码</div>
+                    <div style="font-weight: 600; color: var(--accent-blue);">${item.related_hs_codes || item.hs_codes || '--'}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3" style="background: var(--bg-light); border-radius: 8px;">
+                    <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.3rem;">许可证要求</div>
+                    <div style="font-weight: 600;">${item.license_required || '--'}</div>
+                </div>
+            </div>
+        </div>
+        ${item.detailed_description ? `<div class="mt-3 p-3" style="background: var(--bg-light); border-radius: 8px;">
+            <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.5rem;">详细说明</div>
+            <div style="font-size: 0.9rem; line-height: 1.8;">${item.detailed_description}</div>
+        </div>` : ''}
+        ${item.regulations ? `<div class="mt-3 p-3" style="background: #fef9e7; border-radius: 8px; border-left: 4px solid var(--warning);">
+            <div style="font-size: 0.82rem; color: var(--warning); margin-bottom: 0.5rem; font-weight: 600;"><i class="fas fa-gavel me-1"></i>法规依据</div>
+            <div style="font-size: 0.88rem;">${item.regulations}</div>
+        </div>` : ''}
+    `;
+
+    new bootstrap.Modal(document.getElementById('detailModal')).show();
+}
+
+// 初始加载
+document.addEventListener('DOMContentLoaded', function() {
+    filterDualUse(1);
+});
+</script>
+{% endblock %}

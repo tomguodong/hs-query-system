@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}公司介绍 - 快滴收 · HS智能查询系统{% endblock %}
+{% block content %}
+<div class="container" style="max-width: 900px; padding-top: 2rem; padding-bottom: 3rem;">
+    <!-- 公司头部 -->
+    <div class="text-center mb-5">
+        <h3 style="font-weight: 800; color: var(--primary-dark); margin-bottom: 0.5rem;">
+            <i class="fas fa-building me-2" style="color: var(--accent-blue);"></i>深圳快滴收科技有限公司
+        </h3>
+        <p style="color: var(--text-muted); font-size: 1rem;">Shenzhen Kindle's Logistics Technology Co., Ltd.</p>
+        <a href="https://kindles-logistics.com/" target="_blank" class="btn btn-primary-custom btn-sm mt-2" style="border-radius: 20px; padding: 6px 20px;">
+            <i class="fas fa-globe me-1"></i>访问官网
+        </a>
+    </div>
+
+    <!-- 公司简介 -->
+    <div class="card card-custom mb-4">
+        <div class="card-body" style="padding: 1.5rem;">
+            <h5 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 1rem;">
+                <i class="fas fa-info-circle me-2" style="color: var(--accent-blue);"></i>公司简介
+            </h5>
+            <p style="line-height: 1.8; color: var(--text-dark);">
+                深圳快滴收科技有限公司是一家专注于国际物流服务的科技型企业，致力于为客户提供高效、安全、便捷的跨境物流解决方案。公司依托先进的物流管理系统和丰富的行业经验，为跨境电商、外贸企业及个人用户提供全方位的国际物流服务。
+            </p>
+            <p style="line-height: 1.8; color: var(--text-dark);">
+                公司核心团队拥有多年国际物流从业经验，深耕俄罗斯及独联体国家市场，建立了完善的海外仓配网络，为客户提供门到门一站式物流服务。同时，公司积极拥抱科技创新，自主研发了HS编码智能查询系统，利用AI大模型技术为客户提供智能化的海关编码查询和合规咨询服务。
+            </p>
+        </div>
+    </div>
+
+    <!-- 核心服务 -->
+    <div class="card card-custom mb-4">
+        <div class="card-body" style="padding: 1.5rem;">
+            <h5 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 1rem;">
+                <i class="fas fa-concierge-bell me-2" style="color: var(--success);"></i>核心服务
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-6 col-lg-4">
+                    <div style="background: var(--bg-light); border-radius: 10px; padding: 1.2rem; text-align: center; height: 100%;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">&#x1F6A2;</div>
+                        <div style="font-weight: 700; margin-bottom: 0.3rem;">国际海运</div>
+                        <div style="font-size: 0.82rem; color: var(--text-muted);">整箱/拼箱，覆盖全球主要港口</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div style="background: var(--bg-light); border-radius: 10px; padding: 1.2rem; text-align: center; height: 100%;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">&#x1F682;</div>
+                        <div style="font-weight: 700; margin-bottom: 0.3rem;">中欧班列</div>
+                        <div style="font-size: 0.82rem; color: var(--text-muted);">铁路运输，时效稳定，性价比高</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div style="background: var(--bg-light); border-radius: 10px; padding: 1.2rem; text-align: center; height: 100%;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">&#x1F69B;</div>
+                        <div style="font-weight: 700; margin-bottom: 0.3rem;">中亚卡车</div>
+                        <div style="font-size: 0.82rem; color: var(--text-muted);">卡车航班，灵活高效</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div style="background: var(--bg-light); border-radius: 10px; padding: 1.2rem; text-align: center; height: 100%;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">&#x2708;&#xFE0F;</div>
+                        <div style="font-weight: 700; margin-bottom: 0.3rem;">国际空派</div>
+                        <div style="font-size: 0.82rem; color: var(--text-muted);">空运+派送，快速直达</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div style="background: var(--bg-light); border-radius: 10px; padding: 1.2rem; text-align: center; height: 100%;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">&#x1F4E6;</div>
+                        <div style="font-weight: 700; margin-bottom: 0.3rem;">国际快递</div>
+                        <div style="font-size: 0.82rem; color: var(--text-muted);">DHL/UPS/FedEx等代理</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div style="background: var(--bg-light); border-radius: 10px; padding: 1.2rem; text-align: center; height: 100%;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">&#x1F3ED;</div>
+                        <div style="font-weight: 700; margin-bottom: 0.3rem;">海外仓储</div>
+                        <div style="font-size: 0.82rem; color: var(--text-muted);">俄罗斯/欧洲海外仓配一体化</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 系统说明 -->
+    <div class="card card-custom mb-4">
+        <div class="card-body" style="padding: 1.5rem;">
+            <h5 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 1rem;">
+                <i class="fas fa-laptop-code me-2" style="color: var(--highlight-blue);"></i>HS编码智能查询系统
+            </h5>
+            <p style="line-height: 1.8; color: var(--text-dark);">
+                本系统是快滴收科技自主研发的智能海关编码查询平台，集成以下核心功能：
+            </p>
+            <ul style="line-height: 2; color: var(--text-dark); padding-left: 1.2rem;">
+                <li><strong>智能搜索</strong> - 支持中英文关键词、HS编码多维度搜索</li>
+                <li><strong>AI分类</strong> - 基于大语言模型的商品HS编码智能归类</li>
+                <li><strong>两用物项检测</strong> - 自动识别出口管制清单中的敏感商品</li>
+                <li><strong>AI物流助手</strong> - 智能对话，提供物流咨询和报关指导</li>
+                <li><strong>多层级编码</strong> - 覆盖2位~10位完整海关编码体系</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 联系方式 -->
+    <div class="card card-custom">
+        <div class="card-body" style="padding: 1.5rem;">
+            <h5 style="font-weight: 700; color: var(--primary-dark); margin-bottom: 1rem;">
+                <i class="fas fa-phone-alt me-2" style="color: var(--danger);"></i>联系我们
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div style="font-size: 0.9rem;">
+                        <p><i class="fas fa-globe me-2" style="color: var(--accent-blue);"></i>官网：<a href="https://kindles-logistics.com/" target="_blank" style="color: var(--accent-blue);">kindles-logistics.com</a></p>
+                        <p><i class="fas fa-map-marker-alt me-2" style="color: var(--danger);"></i>地址：深圳市龙岗区平湖街道平安大道1号二栋10楼</p>
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="https://kindles-logistics.com/" target="_blank" class="btn btn-primary-custom" style="border-radius: 8px; padding: 8px 24px;">
+                        <i class="fas fa-external-link-alt me-1"></i>获取物流报价
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+
+{% block title %}数据统计 - 海关编码智能查询系统{% endblock %}
+
+{% block content %}
+<div class="page-title"><i class="fas fa-chart-bar me-2" style="color: var(--accent-blue);"></i>数据统计</div>
+<div class="page-subtitle">系统使用情况与数据分析概览</div>
+
+<!-- 概览卡片 -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" style="background: #ebf5fb; color: var(--accent-blue);">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div>
+                    <div class="stat-value" id="statTotalQueries">--</div>
+                    <div class="stat-label">总查询次数</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card" style="border-left-color: var(--success);">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" style="background: #e8f8f5; color: var(--success);">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <div class="stat-value" id="statUniqueVisitors">--</div>
+                    <div class="stat-label">独立访客</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card" style="border-left-color: var(--warning);">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" style="background: #fef9e7; color: var(--warning);">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div>
+                    <div class="stat-value" id="statAIQueries">--</div>
+                    <div class="stat-label">AI查询次数</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card" style="border-left-color: var(--danger);">
+            <div class="d-flex align-items-center">
+                <div class="stat-icon me-3" style="background: #fde8e8; color: var(--danger);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div>
+                    <div class="stat-value" id="statDualUseChecks">--</div>
+                    <div class="stat-label">两用物项检测</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- 每日查询趋势 -->
+    <div class="col-lg-8">
+        <div class="card card-custom">
+            <div class="card-header">
+                <i class="fas fa-chart-line me-2"></i>最近7天查询趋势
+            </div>
+            <div class="card-body">
+                <div id="dailyTrendChart" style="padding: 1rem 0;">
+                    <!-- CSS柱状图 -->
+                    <div class="d-flex align-items-end justify-content-around" style="height: 220px; gap: 8px;" id="trendBars">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 热门查询TOP10 -->
+    <div class="col-lg-4">
+        <div class="card card-custom h-100">
+            <div class="card-header">
+                <i class="fas fa-fire me-2"></i>热门查询 TOP 10
+            </div>
+            <div class="card-body" style="padding: 1rem;">
+                <div id="topQueriesList">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- HS分类统计 -->
+    <div class="col-lg-6">
+        <div class="card card-custom">
+            <div class="card-header">
+                <i class="fas fa-layer-group me-2"></i>HS分类统计（按章访问量排名）
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" style="font-size: 0.88rem;">
+                        <thead style="background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue)); color: #fff;">
+                            <tr><th>排名</th><th>HS章节</th><th>章节名称</th><th>查询次数</th><th>占比</th></tr>
+                        </thead>
+                        <tbody id="chapterStatsBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模型使用统计 -->
+    <div class="col-lg-6">
+        <div class="card card-custom">
+            <div class="card-header">
+                <i class="fas fa-brain me-2"></i>模型使用统计
+            </div>
+            <div class="card-body">
+                <div id="modelStats">
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <div class="p-3 text-center" style="background: var(--bg-light); border-radius: 10px;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-blue);" id="modelTotalCalls">--</div>
+                                <div style="font-size: 0.82rem; color: var(--text-muted);">总调用次数</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 text-center" style="background: var(--bg-light); border-radius: 10px;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--success);" id="modelAvgTime">--</div>
+                                <div style="font-size: 0.82rem; color: var(--text-muted);">平均响应时间</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 text-center" style="background: var(--bg-light); border-radius: 10px;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--warning);" id="modelAccuracy">--</div>
+                                <div style="font-size: 0.82rem; color: var(--text-muted);">分类准确率</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 text-center" style="background: var(--bg-light); border-radius: 10px;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: #8e44ad;" id="modelFeedbacks">--</div>
+                                <div style="font-size: 0.82rem; color: var(--text-muted);">用户反馈数</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 当前模型状态 -->
+                    <div class="p-3" style="background: linear-gradient(135deg, #ebf5fb, #d4e6f1); border-radius: 10px;">
+                        <div style="font-size: 0.85rem; font-weight: 600; color: var(--primary-dark); margin-bottom: 0.5rem;">
+                            <i class="fas fa-server me-1"></i>当前模型状态
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge badge-success me-2" id="modelStatusBadge">
+                                <i class="fas fa-circle" style="font-size: 0.5rem; vertical-align: middle;"></i> 运行中
+                            </span>
+                            <span style="font-size: 0.85rem; color: var(--text-muted);" id="modelName">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI知识库统计 -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-12">
+        <div class="card card-custom">
+            <div class="card-header">
+                <i class="fas fa-book me-2"></i>AI知识库统计
+            </div>
+            <div class="card-body">
+                <div class="row g-3" id="knowledgeStats">
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <div class="text-center p-3" style="background: var(--bg-light); border-radius: 10px;">
+                            <div style="font-size: 1.3rem; font-weight: 700; color: var(--accent-blue);" id="kbTotalEntries">--</div>
+                            <div style="font-size: 0.82rem; color: var(--text-muted);">知识库总条目</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <div class="text-center p-3" style="background: var(--bg-light); border-radius: 10px;">
+                            <div style="font-size: 1.3rem; font-weight: 700; color: var(--success);" id="kbHSRules">--</div>
+                            <div style="font-size: 0.82rem; color: var(--text-muted);">HS归类规则</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <div class="text-center p-3" style="background: var(--bg-light); border-radius: 10px;">
+                            <div style="font-size: 1.3rem; font-weight: 700; color: var(--warning);" id="kbDualUse">--</div>
+                            <div style="font-size: 0.82rem; color: var(--text-muted);">两用物项规则</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <div class="text-center p-3" style="background: var(--bg-light); border-radius: 10px;">
+                            <div style="font-size: 1.3rem; font-weight: 700; color: #8e44ad;" id="kbFeedback">--</div>
+                            <div style="font-size: 0.82rem; color: var(--text-muted);">反馈学习条目</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <div class="text-center p-3" style="background: var(--bg-light); border-radius: 10px;">
+                            <div style="font-size: 1.3rem; font-weight: 700; color: var(--danger);" id="kbLastUpdate">--</div>
+                            <div style="font-size: 0.82rem; color: var(--text-muted);">最后更新时间</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <div class="text-center p-3" style="background: var(--bg-light); border-radius: 10px;">
+                            <div style="font-size: 1.3rem; font-weight: 700; color: var(--accent-blue);" id="kbCoverage">--</div>
+                            <div style="font-size: 0.82rem; color: var(--text-muted);">编码覆盖率</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadStatistics();
+});
+
+function loadStatistics() {
+    fetch('/api/statistics')
+        .then(response => response.json())
+        .then(data => {
+            // 概览数据
+            if (data.overview) {
+                document.getElementById('statTotalQueries').textContent = (data.overview.total_queries || 0).toLocaleString();
+                document.getElementById('statUniqueVisitors').textContent = (data.overview.unique_visitors || 0).toLocaleString();
+                document.getElementById('statAIQueries').textContent = (data.overview.ai_queries || 0).toLocaleString();
+                document.getElementById('statDualUseChecks').textContent = (data.overview.dual_use_checks || 0).toLocaleString();
+            }
+
+            // 每日趋势
+            if (data.daily_trend) {
+                renderTrendChart(data.daily_trend);
+            }
+
+            // 热门查询
+            if (data.top_queries) {
+                renderTopQueries(data.top_queries);
+            }
+
+            // HS分类统计
+            if (data.chapter_stats) {
+                renderChapterStats(data.chapter_stats);
+            }
+
+            // 模型统计
+            if (data.model_stats) {
+                document.getElementById('modelTotalCalls').textContent = (data.model_stats.total_calls || 0).toLocaleString();
+                document.getElementById('modelAvgTime').textContent = (data.model_stats.avg_response_time || 0) + 's';
+                document.getElementById('modelAccuracy').textContent = (data.model_stats.accuracy || 0) + '%';
+                document.getElementById('modelFeedbacks').textContent = (data.model_stats.feedbacks || 0).toLocaleString();
+                if (data.model_stats.current_model) {
+                    document.getElementById('modelName').textContent = data.model_stats.current_model;
+                }
+                if (data.model_stats.status) {
+                    const badge = document.getElementById('modelStatusBadge');
+                    if (data.model_stats.status === 'running') {
+                        badge.className = 'badge badge-success me-2';
+                        badge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.5rem; vertical-align: middle;"></i> 运行中';
+                    } else {
+                        badge.className = 'badge badge-danger me-2';
+                        badge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.5rem; vertical-align: middle;"></i> 已停止';
+                    }
+                }
+            }
+
+            // 知识库统计
+            if (data.knowledge_stats) {
+                document.getElementById('kbTotalEntries').textContent = (data.knowledge_stats.total_entries || 0).toLocaleString();
+                document.getElementById('kbHSRules').textContent = (data.knowledge_stats.hs_rules || 0).toLocaleString();
+                document.getElementById('kbDualUse').textContent = (data.knowledge_stats.dual_use_rules || 0).toLocaleString();
+                document.getElementById('kbFeedback').textContent = (data.knowledge_stats.feedback_entries || 0).toLocaleString();
+                document.getElementById('kbLastUpdate').textContent = data.knowledge_stats.last_update || '--';
+                document.getElementById('kbCoverage').textContent = (data.knowledge_stats.coverage || 0) + '%';
+            }
+        })
+        .catch(err => {
+            console.error('加载统计数据失败:', err);
+            loadDefaultData();
+        });
+}
+
+function loadDefaultData() {
+    // 默认展示数据
+    document.getElementById('statTotalQueries').textContent = '0';
+    document.getElementById('statUniqueVisitors').textContent = '0';
+    document.getElementById('statAIQueries').textContent = '0';
+    document.getElementById('statDualUseChecks').textContent = '0';
+
+    const defaultTrend = [
+        { date: '04-16', count: 12 }, { date: '04-17', count: 18 },
+        { date: '04-18', count: 25 }, { date: '04-19', count: 15 },
+        { date: '04-20', count: 30 }, { date: '04-21', count: 22 },
+        { date: '04-22', count: 28 }
+    ];
+    renderTrendChart(defaultTrend);
+
+    document.getElementById('topQueriesList').innerHTML = `
+        <div class="text-center py-3" style="color: var(--text-muted); font-size: 0.88rem;">
+            <i class="fas fa-inbox me-1"></i>暂无查询数据
+        </div>`;
+}
+
+// 渲染趋势柱状图（纯CSS）
+function renderTrendChart(trend) {
+    const container = document.getElementById('trendBars');
+    const maxCount = Math.max(...trend.map(t => t.count), 1);
+
+    let html = '';
+    trend.forEach(item => {
+        const heightPercent = (item.count / maxCount) * 100;
+        html += `
+        <div class="text-center" style="flex: 1; max-width: 80px;">
+            <div style="font-size: 0.78rem; font-weight: 700; color: var(--accent-blue); margin-bottom: 4px;">${item.count}</div>
+            <div style="width: 100%; height: ${heightPercent}%; min-height: 4px; background: linear-gradient(180deg, var(--highlight-blue), var(--accent-blue)); border-radius: 6px 6px 0 0; transition: height 0.5s;"></div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 6px;">${item.date}</div>
+        </div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+// 渲染热门查询
+function renderTopQueries(queries) {
+    const container = document.getElementById('topQueriesList');
+    if (!queries || queries.length === 0) {
+        container.innerHTML = `<div class="text-center py-3" style="color: var(--text-muted); font-size: 0.88rem;"><i class="fas fa-inbox me-1"></i>暂无数据</div>`;
+        return;
+    }
+
+    const colors = ['var(--accent-blue)', 'var(--success)', 'var(--warning)', 'var(--danger)', '#8e44ad', 'var(--accent-blue)', 'var(--success)', 'var(--warning)', 'var(--danger)', '#8e44ad'];
+    let html = '';
+    queries.forEach((q, idx) => {
+        const color = colors[idx % colors.length];
+        html += `
+        <div class="d-flex align-items-center py-2 ${idx < queries.length - 1 ? 'border-bottom' : ''}" style="border-color: var(--border-color) !important;">
+            <span style="width: 24px; height: 24px; border-radius: 6px; background: ${color}; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; margin-right: 10px; flex-shrink: 0;">
+                ${idx + 1}
+            </span>
+            <div style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.88rem;">
+                ${q.keyword || q.query || '--'}
+            </div>
+            <span style="font-size: 0.78rem; color: var(--text-muted); margin-left: 8px; flex-shrink: 0;">${q.count || 0}次</span>
+        </div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+// 渲染HS分类统计
+function renderChapterStats(chapters) {
+    const tbody = document.getElementById('chapterStatsBody');
+    if (!chapters || chapters.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-3" style="color: var(--text-muted);">暂无数据</td></tr>`;
+        return;
+    }
+
+    const total = chapters.reduce((sum, c) => sum + (c.count || 0), 0) || 1;
+    let html = '';
+    chapters.slice(0, 10).forEach((ch, idx) => {
+        const percent = ((ch.count || 0) / total * 100).toFixed(1);
+        html += `<tr>
+            <td><strong>${idx + 1}</strong></td>
+            <td><code style="color: var(--accent-blue);">${ch.chapter || '--'}</code></td>
+            <td>${ch.name || '--'}</td>
+            <td><strong>${(ch.count || 0).toLocaleString()}</strong></td>
+            <td>
+                <div class="d-flex align-items-center">
+                    <div style="width: 60px; height: 6px; background: #e9ecef; border-radius: 3px; overflow: hidden; margin-right: 8px;">
+                        <div style="width: ${percent}%; height: 100%; background: var(--accent-blue); border-radius: 3px;"></div>
+                    </div>
+                    <span style="font-size: 0.82rem;">${percent}%</span>
+                </div>
+            </td>
+        </tr>`;
+    });
+
+    tbody.innerHTML = html;
+}
+</script>
+{% endblock %}

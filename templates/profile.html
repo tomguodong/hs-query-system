@@ -1,0 +1,382 @@
+{% extends "base.html" %}
+
+{% block title %}个人中心 - 快滴收 · HS智能查询系统{% endblock %}
+
+{% block content %}
+<div class="page-title"><i class="fas fa-user-circle me-2"></i>个人中心</div>
+<div class="page-subtitle">管理您的个人信息、密码和查询统计</div>
+
+<!-- Tab导航 -->
+<ul class="nav nav-tabs nav-tabs-custom mb-4" id="profileTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#infoPanel"
+                type="button" role="tab" aria-controls="infoPanel" aria-selected="true">
+            <i class="fas fa-id-card me-1"></i>个人信息
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="password-tab" data-bs-toggle="tab" data-bs-target="#passwordPanel"
+                type="button" role="tab" aria-controls="passwordPanel" aria-selected="false">
+            <i class="fas fa-key me-1"></i>修改密码
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#statsPanel"
+                type="button" role="tab" aria-controls="statsPanel" aria-selected="false">
+            <i class="fas fa-chart-line me-1"></i>查询统计
+        </button>
+    </li>
+</ul>
+
+<!-- Tab内容 -->
+<div class="tab-content" id="profileTabContent">
+
+    <!-- Tab1: 个人信息 -->
+    <div class="tab-pane fade show active" id="infoPanel" role="tabpanel" aria-labelledby="info-tab">
+        <div class="card card-custom">
+            <div class="card-header">
+                <i class="fas fa-user me-2"></i>个人信息
+            </div>
+            <div class="card-body">
+                <div id="userInfoLoading" class="text-center py-4">
+                    <div class="loading-spinner mx-auto mb-3"></div>
+                    <span style="color: var(--text-muted);">正在加载用户信息...</span>
+                </div>
+                <div id="userInfoContent" style="display: none;">
+                    <table class="table table-custom mb-0">
+                        <tbody>
+                            <tr>
+                                <td style="width: 160px; font-weight: 600; color: var(--primary-dark);">
+                                    <i class="fas fa-user me-2" style="color: var(--accent-blue);"></i>用户名
+                                </td>
+                                <td id="infoUsername">--</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600; color: var(--primary-dark);">
+                                    <i class="fas fa-envelope me-2" style="color: var(--accent-blue);"></i>邮箱
+                                </td>
+                                <td id="infoEmail">--</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600; color: var(--primary-dark);">
+                                    <i class="fas fa-building me-2" style="color: var(--accent-blue);"></i>公司
+                                </td>
+                                <td id="infoCompany">--</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600; color: var(--primary-dark);">
+                                    <i class="fas fa-user-tag me-2" style="color: var(--accent-blue);"></i>角色
+                                </td>
+                                <td id="infoRole">--</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600; color: var(--primary-dark);">
+                                    <i class="fas fa-calendar-plus me-2" style="color: var(--accent-blue);"></i>注册时间
+                                </td>
+                                <td id="infoCreatedAt">--</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600; color: var(--primary-dark);">
+                                    <i class="fas fa-clock me-2" style="color: var(--accent-blue);"></i>最后登录
+                                </td>
+                                <td id="infoLastLogin">--</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab2: 修改密码 -->
+    <div class="tab-pane fade" id="passwordPanel" role="tabpanel" aria-labelledby="password-tab">
+        <div class="card card-custom">
+            <div class="card-header">
+                <i class="fas fa-lock me-2"></i>修改密码
+            </div>
+            <div class="card-body">
+                <form id="passwordForm" style="max-width: 480px;">
+                    <div class="mb-3">
+                        <label for="oldPassword" class="form-label" style="font-weight: 600;">
+                            <i class="fas fa-key me-1" style="color: var(--accent-blue);"></i>旧密码
+                        </label>
+                        <input type="password" class="form-control" id="oldPassword" name="old_password"
+                               placeholder="请输入当前密码" required
+                               style="border-radius: 8px; padding: 10px;">
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label" style="font-weight: 600;">
+                            <i class="fas fa-lock me-1" style="color: var(--accent-blue);"></i>新密码
+                        </label>
+                        <input type="password" class="form-control" id="newPassword" name="new_password"
+                               placeholder="请输入新密码（至少6位）" required
+                               style="border-radius: 8px; padding: 10px;">
+                    </div>
+                    <div class="mb-4">
+                        <label for="confirmPassword" class="form-label" style="font-weight: 600;">
+                            <i class="fas fa-lock me-1" style="color: var(--accent-blue);"></i>确认新密码
+                        </label>
+                        <input type="password" class="form-control" id="confirmPassword"
+                               placeholder="请再次输入新密码" required
+                               style="border-radius: 8px; padding: 10px;">
+                    </div>
+                    <button type="submit" class="btn btn-primary-custom" id="passwordSubmitBtn">
+                        <i class="fas fa-save me-1"></i>保存修改
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab3: 查询统计 -->
+    <div class="tab-pane fade" id="statsPanel" role="tabpanel" aria-labelledby="stats-tab">
+        <!-- 统计卡片 -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon me-3" style="background: rgba(52, 152, 219, 0.1); color: var(--highlight-blue);">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div>
+                            <div class="stat-value" id="statTotalQueries">0</div>
+                            <div class="stat-label">总查询次数</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="stat-card" style="border-left-color: var(--success);">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon me-3" style="background: rgba(39, 174, 96, 0.1); color: var(--success);">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div>
+                            <div class="stat-value" id="statAiQueries">0</div>
+                            <div class="stat-label">AI分类次数</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="stat-card" style="border-left-color: var(--warning);">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon me-3" style="background: rgba(243, 156, 18, 0.1); color: var(--warning);">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div>
+                            <div class="stat-value" id="statDualUse">0</div>
+                            <div class="stat-label">两用物项检测次数</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 最近7天查询趋势 -->
+        <div class="card card-custom">
+            <div class="card-header">
+                <i class="fas fa-chart-bar me-2"></i>最近7天查询趋势
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <div id="statsLoading" class="text-center py-4">
+                    <div class="loading-spinner mx-auto mb-3"></div>
+                    <span style="color: var(--text-muted);">正在加载统计数据...</span>
+                </div>
+                <div class="table-responsive" id="weeklyTableWrapper" style="display: none;">
+                    <table class="table table-custom table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>查询次数</th>
+                            </tr>
+                        </thead>
+                        <tbody id="weeklyTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Toast提示函数
+function showToast(message, type) {
+    type = type || 'info';
+    var iconMap = {
+        success: 'fas fa-check-circle',
+        danger: 'fas fa-times-circle',
+        warning: 'fas fa-exclamation-circle',
+        info: 'fas fa-info-circle'
+    };
+    var bgMap = {
+        success: 'linear-gradient(135deg, #d4edda, #c3e6cb)',
+        danger: 'linear-gradient(135deg, #f8d7da, #f5c6cb)',
+        warning: 'linear-gradient(135deg, #fff3cd, #ffeaa7)',
+        info: 'linear-gradient(135deg, #d1ecf1, #bee5eb)'
+    };
+    var colorMap = {
+        success: '#155724',
+        danger: '#721c24',
+        warning: '#856404',
+        info: '#0c5460'
+    };
+    var borderMap = {
+        success: 'var(--success)',
+        danger: 'var(--danger)',
+        warning: 'var(--warning)',
+        info: 'var(--info)'
+    };
+
+    var toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;min-width:280px;max-width:420px;' +
+        'padding:14px 20px;border-radius:8px;border-left:4px solid ' + borderMap[type] + ';' +
+        'background:' + bgMap[type] + ';color:' + colorMap[type] + ';box-shadow:0 4px 15px rgba(0,0,0,0.15);' +
+        'font-size:0.92rem;opacity:0;transform:translateX(100%);transition:all 0.4s ease;';
+    toast.innerHTML = '<i class="' + iconMap[type] + ' me-2"></i>' + message;
+    document.body.appendChild(toast);
+
+    setTimeout(function() {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(0)';
+    }, 50);
+
+    setTimeout(function() {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        setTimeout(function() { toast.remove(); }, 400);
+    }, 3000);
+}
+
+// 加载用户信息
+function loadUserInfo() {
+    fetch('/api/profile/info')
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            if (data.success && data.user) {
+                var user = data.user;
+                document.getElementById('infoUsername').textContent = user.username || '--';
+                document.getElementById('infoEmail').textContent = user.email || '--';
+                document.getElementById('infoCompany').textContent = user.company || '--';
+
+                var roleText = user.role === 'admin' ? '管理员' : '普通用户';
+                var roleBadge = user.role === 'admin'
+                    ? '<span class="badge badge-danger">管理员</span>'
+                    : '<span class="badge badge-info">普通用户</span>';
+                document.getElementById('infoRole').innerHTML = roleBadge;
+                document.getElementById('infoCreatedAt').textContent = user.created_at || '--';
+                document.getElementById('infoLastLogin').textContent = user.last_login || '--';
+
+                document.getElementById('userInfoLoading').style.display = 'none';
+                document.getElementById('userInfoContent').style.display = 'block';
+            }
+        })
+        .catch(function(err) {
+            document.getElementById('userInfoLoading').innerHTML =
+                '<span style="color: var(--danger);"><i class="fas fa-times-circle me-2"></i>加载失败：' + err.message + '</span>';
+        });
+}
+
+// 加载统计数据
+function loadStats() {
+    fetch('/api/profile/stats')
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            if (data.success) {
+                document.getElementById('statTotalQueries').textContent = data.total_queries || 0;
+                document.getElementById('statAiQueries').textContent = data.ai_queries || 0;
+                document.getElementById('statDualUse').textContent = data.dual_use_checks || 0;
+
+                var weekly = data.weekly_trend || [];
+                var tbody = document.getElementById('weeklyTableBody');
+
+                if (weekly.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="2" class="text-center py-4" style="color: var(--text-muted);">' +
+                        '<i class="fas fa-inbox" style="font-size: 1.5rem; opacity: 0.3; margin-bottom: 0.5rem; display: block;"></i>' +
+                        '最近7天暂无查询记录</td></tr>';
+                } else {
+                    var html = '';
+                    weekly.forEach(function(item) {
+                        html += '<tr><td style="font-weight: 500;">' + item.date + '</td>' +
+                            '<td><span class="badge badge-info">' + item.count + '</span></td></tr>';
+                    });
+                    tbody.innerHTML = html;
+                }
+
+                document.getElementById('statsLoading').style.display = 'none';
+                document.getElementById('weeklyTableWrapper').style.display = 'block';
+            }
+        })
+        .catch(function(err) {
+            document.getElementById('statsLoading').innerHTML =
+                '<span style="color: var(--danger);"><i class="fas fa-times-circle me-2"></i>加载失败：' + err.message + '</span>';
+        });
+}
+
+// 修改密码
+document.getElementById('passwordForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    var oldPassword = document.getElementById('oldPassword').value.trim();
+    var newPassword = document.getElementById('newPassword').value.trim();
+    var confirmPassword = document.getElementById('confirmPassword').value.trim();
+
+    if (!oldPassword || !newPassword) {
+        showToast('请输入旧密码和新密码', 'warning');
+        return;
+    }
+    if (newPassword.length < 6) {
+        showToast('新密码长度至少6位', 'warning');
+        return;
+    }
+    if (newPassword !== confirmPassword) {
+        showToast('两次输入的新密码不一致', 'warning');
+        return;
+    }
+
+    var btn = document.getElementById('passwordSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>提交中...';
+
+    fetch('/api/profile/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            old_password: oldPassword,
+            new_password: newPassword
+        })
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save me-1"></i>保存修改';
+
+        if (data.success) {
+            showToast(data.message || '密码修改成功', 'success');
+            document.getElementById('passwordForm').reset();
+        } else {
+            showToast(data.error || '密码修改失败', 'danger');
+        }
+    })
+    .catch(function(err) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save me-1"></i>保存修改';
+        showToast('请求失败：' + err.message, 'danger');
+    });
+});
+
+// Tab切换时加载数据
+document.getElementById('stats-tab').addEventListener('shown.bs.tab', function() {
+    loadStats();
+});
+
+// 页面加载时获取用户信息
+document.addEventListener('DOMContentLoaded', function() {
+    loadUserInfo();
+});
+</script>
+{% endblock %}
