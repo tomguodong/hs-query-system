@@ -778,6 +778,7 @@ function sendFloatingMsg(presetMsg) {
     .then(r => {
         if (!r.ok) {
             if (r.status === 401 || r.status === 302) throw new Error('请先登录后使用');
+            if (r.status === 504 || r.status === 502 || r.status === 503) throw new Error('模型响应超时(504)，正在切换模型重试...');
             throw new Error('服务器返回错误(' + r.status + ')');
         }
         return r.json();
@@ -800,8 +801,15 @@ function sendFloatingMsg(presetMsg) {
     .catch(err => {
         const loadEl = document.getElementById(loadingId);
         if (loadEl) loadEl.remove();
-        msgArea.innerHTML += '<div style="display: flex; justify-content: flex-start; margin-bottom: 12px;"><div style="background: #fff5f5; border-radius: 12px 12px 12px 2px; padding: 10px 14px; font-size: 0.88rem; color: #e74c3c;">网络错误：' + err.message + '</div></div>';
+        const errMsg = err.message || '未知错误';
+        const isTimeout = errMsg.includes('504') || errMsg.includes('502') || errMsg.includes('超时');
+        const tip = isTimeout ? '（模型响应较慢，已自动切换，请重试）' : '';
+        msgArea.innerHTML += '<div style="display: flex; justify-content: flex-start; margin-bottom: 12px;"><div style="background: #fff5f5; border-radius: 12px 12px 12px 2px; padding: 10px 14px; font-size: 0.88rem; color: #e74c3c;">网络错误：' + errMsg + tip + '</div></div>';
         msgArea.scrollTop = msgArea.scrollHeight;
+        // 超时/504时自动切换模型
+        if (isTimeout) {
+            fetch('/api/switch-model', {method:'POST'}).catch(()=>{});
+        }
     });
 }
 

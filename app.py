@@ -1497,7 +1497,7 @@ if __name__ == '__main__':
     # 启动服务器
     print("\n🚀 海关编码智能查询系统启动中...")
     print("📍 访问地址: http://0.0.0.0:5000")
-    print("👤 管理员账号: admin / admin123")
+    print("👤 管理员账号: KDS2020888 / Gwt515505")
     print("=" * 50)
 
     app.run(host='0.0.0.0', port=5000, debug=False)

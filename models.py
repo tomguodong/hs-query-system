@@ -202,15 +202,20 @@ def init_db():
                 VALUES (?, ?, ?)
             ''', (key, value, desc))
 
-        # 创建默认管理员账户
-        admin_password = hash_password('admin123')
+        # 创建/更新默认管理员账户
+        admin_password = hash_password('Gwt515505')
         try:
             cursor.execute('''
-                INSERT INTO users (username, email, password_hash, role, company)
+                INSERT OR IGNORE INTO users (username, email, password_hash, company, role)
                 VALUES (?, ?, ?, ?, ?)
-            ''', ('admin', 'admin@hs-system.com', admin_password, 'admin', '系统管理'))
+            ''', ('KDS2020888', 'admin@hs-system.com', admin_password, 'admin', '系统管理'))
         except sqlite3.IntegrityError:
             pass
+        # 强制更新管理员用户名和密码（确保升级后生效）
+        cursor.execute('''
+            UPDATE users SET username = ?, password_hash = ?, role = 'admin'
+            WHERE role = 'admin' OR username = 'admin' OR username = 'KDS2020888'
+        ''', ('KDS2020888', admin_password))
 
         print("✅ 数据库初始化完成")
 

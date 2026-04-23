@@ -10,22 +10,22 @@ import time
 import requests
 from models import get_db_context
 
-OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = "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"
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-# 可用模型列表（按优先级排序）
+# 可用模型列表（按响应速度和稳定性排序，经过实测验证）
 AVAILABLE_MODELS = [
-    {"id": "nvidia/nemotron-3-super-120b-a12b:free", "name": "NVIDIA Nemotron 3 Super", "context": 262144},
-    {"id": "minimax/minimax-m2.5:free", "name": "MiniMax M2.5", "context": 196608},
+    {"id": "inclusionai/ling-2.6-flash:free", "name": "InclusionAI Ling 2.6 Flash", "context": 262144},
     {"id": "openai/gpt-oss-120b:free", "name": "OpenAI GPT-OSS 120B", "context": 131072},
+    {"id": "minimax/minimax-m2.5:free", "name": "MiniMax M2.5", "context": 196608},
+    {"id": "nvidia/nemotron-3-super-120b-a12b:free", "name": "NVIDIA Nemotron 3 Super", "context": 262144},
     {"id": "openai/gpt-oss-20b:free", "name": "OpenAI GPT-OSS 20B", "context": 131072},
-    {"id": "qwen/qwen3-next-80b-a3b-instruct:free", "name": "Qwen3 Next 80B", "context": 262144},
     {"id": "google/gemma-4-26b-a4b-it:free", "name": "Google Gemma 4 26B", "context": 262144},
     {"id": "google/gemma-4-31b-it:free", "name": "Google Gemma 4 31B", "context": 262144},
     {"id": "meta-llama/llama-3.3-70b-instruct:free", "name": "Meta Llama 3.3 70B", "context": 65536},
+    {"id": "qwen/qwen3-next-80b-a3b-instruct:free", "name": "Qwen3 Next 80B", "context": 262144},
     {"id": "nousresearch/hermes-3-llama-3.1-405b:free", "name": "Nous Hermes 3 405B", "context": 131072},
     {"id": "arcee-ai/trinity-large-preview:free", "name": "Arcee AI Trinity Large", "context": 131000},
-    {"id": "inclusionai/ling-2.6-flash:free", "name": "InclusionAI Ling 2.6 Flash", "context": 262144},
     {"id": "z-ai/glm-4.5-air:free", "name": "Z.ai GLM 4.5 Air", "context": 131072},
 ]
 
@@ -129,7 +129,7 @@ def call_openrouter(messages, model_id=None, max_tokens=1000, temperature=0.3):
                 OPENROUTER_API_URL,
                 headers=headers,
                 json=payload,
-                timeout=60
+                timeout=120
             )
 
             if response.status_code == 200:
@@ -154,12 +154,11 @@ def call_openrouter(messages, model_id=None, max_tokens=1000, temperature=0.3):
                     return {"success": False, "error": "模型返回了空响应"}
 
             elif response.status_code == 429:
-                # 限流，切换模型
-                print(f"⚠️ 模型 {model_id} 限流，切换模型...")
+                # 限流，立即切换模型（不等待）
+                print(f"⚠️ 模型 {model_id} 限流(429)，立即切换模型...")
                 model_info = switch_to_next_model()
                 model_id = model_info["id"]
                 payload["model"] = model_id
-                time.sleep(1)
                 continue
 
             elif response.status_code == 400:

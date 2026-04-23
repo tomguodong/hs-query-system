@@ -217,6 +217,15 @@ async function sendMessage() {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({message: message, history: chatHistory})
         });
+        if (!resp.ok) {
+            if (resp.status === 504 || resp.status === 502 || resp.status === 503) {
+                removeTypingIndicator();
+                addMessage('assistant', '⚠️ 模型响应超时，已自动切换模型，请重新发送问题。');
+                fetch('/api/switch-model', {method:'POST'}).catch(()=>{});
+                return;
+            }
+            throw new Error('服务器错误(' + resp.status + ')');
+        }
         const data = await resp.json();
 
         removeTypingIndicator();
@@ -229,7 +238,7 @@ async function sendMessage() {
         }
     } catch (err) {
         removeTypingIndicator();
-        addMessage('assistant', 'Error: 网络错误，请检查连接后重试');
+        addMessage('assistant', 'Error: ' + (err.message || '网络错误，请检查连接后重试'));
     }
 
     isSending = false;
